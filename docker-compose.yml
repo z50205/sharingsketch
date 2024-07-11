@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  web:
+    ports:
+      - "8002:8002"
+    container_name: sharing_sketch_20240711
+    image: sharing_sketch

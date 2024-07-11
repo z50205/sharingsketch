@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+        ul {
+            height: 500px
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body onload="init()">
+    <div class="row">
+        <div class="col-sm-3" style=" position:relative;z-index: 6; background-color: rgb(255, 229, 211);">
+            <h1>Sharing Sketch</h1>
+            <div id="landing">
+                <div class="form-group row">
+                    <label for="inputEmail3" class="col-sm-4 col-form-label">Username</label>
+                    <div class="col-sm-10">
+                        <input type="email" class="form-control" id="userName" placeholder="Username">
+                    </div>
+                    <button class="btn btn-outline-secondary" type="button" id="join-btn">JOIN</button>
+                </div>
+                <!-- <div class="form-group row">
+                    <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
+                    </div>
+                </div> -->
+            </div>
+            <div class="rounded-3 border border-dark p-3" id="chat" style="display:none">
+                <ul id="chat-messages"></ul>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="message" placeholder="Enter a Message">
+                    <button class="btn btn-outline-secondary" type="button" id="button-addon2"
+                        onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+            <div class="rounded-3 border border-dark p-3 mt-5" id="members" style="display:none">
+                <ul id="members-list"></ul>
+            </div>
+        </div>
+        <div class="col" id="painting-area ">
+            <canvas id="can-others"
+                style="position:absolute;top:20%;left:25%;border:2px solid; touch-action: none;z-index: 1;"></canvas>
+            <canvas id="can"
+                style="position:absolute;top:20%;left:25%;border:2px solid; touch-action: none;z-index: 1;"></canvas>
+            <div class="row">
+                <div class="col-sm-6 rounded-3 border border-info"
+                    style="background:rgb(237, 255, 254); position:relative;z-index: 6;">
+                    <div class="row">
+                        <div class="fw-bold">Choose Color</div>
+                        <div class="col">
+                            <input type="color" id="favcolor" value="#ff0000">
+                        </div>
+                        <div class="col">
+                            <div class="p-1 mb-1 rounded-3 text-white" style="background:green;" id="green"
+                                onclick="color(this)">
+                                green</div>
+                        </div>
+                        <div class="col">
+                            <div class="p-1 mb-1 rounded-3 text-white" style="background:blue;" id="blue"
+                                onclick="color(this)">
+                                blue
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="p-1 mb-1 rounded-3 text-white" style="background:red;" id="red"
+                                onclick="color(this)">
+                                red
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="p-1 mb-1 rounded-3 text-black" style="background:yellow;" id="yellow"
+                                onclick="color(this)">
+                                yellow</div>
+                        </div>
+                        <div class="col">
+                            <div class="p-1 mb-1 rounded-3 text-white" style="background:orange;" id="orange"
+                                onclick="color(this)">
+                                orange</div>
+                        </div>
+                        <div class="col">
+                            <div class="p-1 mb-1 rounded-3 text-white" style="background:black;" id="black"
+                                onclick="color(this)">
+                                black</div>
+                        </div>
+                        <div class="fw-bold">Eraser</div>
+                        <div class="col">
+                            <div class="p-1 mb-1 rounded-3 text-black" style="background:white;border:2px solid"
+                                id="erase" onclick="color(this)">Eraser</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2 rounded-3 align-middle" style=" position:relative;z-index: 6;">
+                    <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
+                    <button type="button" class="btn btn-outline-primary" id="save_image"
+                        onclick="saveimage()">save</button><br>
+                    <label for="load_image" class="btn btn-outline-success">load</label><br>
+                    <input id="load_image" style="display: none;" type="file" />
+                    <button type="button" class="btn btn-outline-danger" id="clr"
+                        onclick="erase_all()">clear</button><br>
+                    <input type="checkbox" class="btn-check" id="mirror_pivot" autocomplete="off" onclick="mirror()">
+                    <label class="btn btn-outline-info" for="mirror_pivot">mirror</label><br>
+                </div>
+            </div>
+            <div class="col-sm-6" style=" position:relative;z-index: 6;">
+                <label for="customRange1" class="form-label">Example range</label>
+                <input type="range" class="form-range" id="width_range">
+            </div>
+        </div>
+
+    </div>
+    <!-- Socketio Code -->
+    <script>
+        //Chatroom part
+        const socket = io({ autoConnect: false });
+        document.getElementById("join-btn").addEventListener("click", function () {
+            let username = document.getElementById("userName").value;
+            socket.connect();
+            socket.on("connect", function () {
+                socket.emit("user_join", username);
+            })
+            document.getElementById("chat").style.display = "block";
+            document.getElementById("members").style.display = "block";
+            document.getElementById("landing").style.display = "none";
+        })
+        document.getElementById("message").addEventListener("keyup", function (event) {
+            if (event.key == "Enter") {
+                sendMessage();
+            }
+        })
+        window.addEventListener("beforeunload", (event) => {
+            console.log('Leaving');
+            bye();
+        });
+        function bye() {
+            socket.emit("bye");
+        }
+        socket.on("memberslistUpdate", function (data) {
+            memberslist = data["memberslist"];
+            console.log(memberslist[0]);
+            let ul = document.getElementById("members-list");
+            ul.innerHTML = "";
+            for (i = 0; i < memberslist.length; i++) {
+                let li = document.createElement("li");
+                li.appendChild(document.createTextNode("member " + i + ":" + memberslist[i]));
+                ul.appendChild(li);
+            }
+        })
+        socket.on("chat", function (data) {
+            let ul = document.getElementById("chat-messages");
+            let li = document.createElement("li");
+            li.appendChild(document.createTextNode(data["username"] + ":" + data["message"]));
+            ul.appendChild(li);
+            ul.scrollTop = ul.scrollHeight;
+        })
+        //Sketchboard part
+        socket.on("updateImg", function (data) {
+            // console.log(data["updateimg"]);
+            // var img=document.getElementById("update_img");
+            // img.src=data["updateimg"];
+            var img = new Image();
+            img.src = data["updateimg"];
+            img.onload = function () {
+                ctx_others.clearRect(0, 0, w, h);
+                ctx_others.drawImage(img, 0, 0);
+            };
+            // canvas.getContext("2d").drawImage(img, 0, 0);
+        })
+        function sendMessage() {
+            let message = document.getElementById("message").value;
+            socket.emit("new_message", message);
+            document.getElementById("message").value = "";
+        }
+    </script>
+    <!-- Client Render Code -->
+    <script type="text/javascript">
+        //Canvas variables
+        var canvas, ctx, flag, pan_flag = false,
+            prevX = 0,
+            currX = 0,
+            prevY = 0,
+            currY = 0,
+            dot_flag = false;
+        draw_flag = true;
+
+        //Drawtool variables
+        line_widths = [2, 10, 0];//Set tools linewidth 1.pen；2.eraser 3.other(no _use)
+        line_widths_max = [100, 200, 0];//Set tools linewidth Maximum 1.pen；2.eraser 3.other(no _use)
+        pan_flag = false;
+        mirror_flag = false;
+        restore_max = 5;
+        var x = "black"
+
+        //Init
+        function init() {
+            //Canvas variables
+            can_width = 1000;
+            can_height = 1000;
+            x_old_origin = 0;
+            y_old_origin = 0;
+            x_offset = 0;
+            y_offset = 0;
+            canvas = document.getElementById('can');
+            canvas_others = document.getElementById('can-others');
+            fileUploader = document.getElementById("load_image");
+            canvas.height = can_height;
+            canvas_others.height = can_height;
+            canvas.width = can_width;
+            canvas_others.width = can_width;
+            scale = 1.0;
+            scale_xy = [1, 1];
+            ctx = canvas.getContext("2d");
+            ctx_others = canvas_others.getContext("2d");
+            w = canvas.width;
+            h = canvas.height;
+            scale_orgin = [w / 2, h / 2];
+
+            //Tool variables
+            space_pivot = false;
+            restore = [canvas.getContext("2d").getImageData(0, 0, w, h)];//Undo record
+            width_range = document.getElementById('width_range');
+            custom_color = document.getElementById("favcolor");
+
+
+            //Tool Cancel defaultevent
+            window.addEventListener("wheel", e => e.preventDefault(), { passive: false })
+            window.addEventListener('keydown', function (e) {
+                if (e.keyCode == 32 && e.target == document.body) {
+                    e.preventDefault();
+                }
+            });
+
+            //Canvas Sketch/Pan eventlistener(pointer)
+            canvas.addEventListener("pointermove", function (e) {
+                mouse_position = [e.clientX, e.clientY];
+                if (space_pivot)
+                    panCanvas('move', e)
+                else
+                    findxy('move', e, draw_flag)
+            }, false);
+            canvas.addEventListener("pointerdown", function (e) {
+                if (space_pivot)
+                    panCanvas('down', e)
+                else
+                    findxy('down', e, draw_flag)
+            }, false);
+            canvas.addEventListener("pointerup", function (e) {
+                if (space_pivot)
+                    panCanvas('up', e)
+                else
+                    findxy('up', e, draw_flag)
+            }, false);
+            canvas.addEventListener("pointerout", function (e) {
+                findxy('out', e, draw_flag)
+            }, false);
+
+            //Tool Change pointerwidth eventlistener
+            width_range.addEventListener("pointerup", function (e) {
+                if (draw_flag) {
+                    line_widths[0] = width_range.value;
+                } else
+                    line_widths[1] = width_range.value;
+            }, false);
+            //Tool Undo/PAN eventlistener
+            document.addEventListener("keydown", function (e) {
+                e.preventDefault;
+                if (e.ctrlKey && e.keyCode == 90)
+                    backLastStep();
+                if (e.keyCode == 32) {
+                    e.preventDefault;
+                    space_pivot = true;
+                }
+                if (e.keyCode == 81) {
+                    mirror();
+                }
+                // console.log(space_pivot);
+            }, false);
+            //Tool PAN eventlistener
+            document.addEventListener("keyup", function (e) {
+                if (e.keyCode == 32) {
+                    e.preventDefault;
+                    space_pivot = false;
+                    flag = false;
+                }
+                // console.log(space_pivot);
+            }, false);
+            //Tool Zoom-in eventlistener
+            canvas.addEventListener("wheel", function (e) {
+                zoom_in(e)
+            }, false);
+            //Tool custom color eventlistener
+            custom_color.addEventListener("input", function (e) {
+                x = custom_color.value.toString();
+            }, false);
+            updateToolInfo();
+            //Tool load eventlistener
+            fileUploader.addEventListener('change', event => {
+                loadimage(event);
+            });
+        }
+        //Tool Undo
+        function backLastStep() {
+            if (restore.length > 1) {
+                ctx.putImageData(restore[restore.length - 2], 0, 0);
+                restore.length--;
+                updateCanvas();
+            }
+        }
+        //Tool Zoom
+        function zoom_in(e) {
+            // ctx.scale(0.5, 0.5);
+            // canvas.height=2*h;
+            if (0.5 <= scale <= 3) {
+                scale += e.deltaY * -0.001;
+                if (scale > 3)
+                    scale = 3;
+                if (scale < 0.5)
+                    scale = 0.5;
+            }
+
+
+            if (!mirror_flag) {
+                // scale_orgin[0] = (e.clientX - canvas.offsetLeft - scale_orgin[0]) / (scale) + scale_orgin[0];
+                // scale_orgin[1] = (e.clientY - canvas.offsetTop - scale_orgin[1]) / (scale) + scale_orgin[1];
+                // scaleOriginKey = scale_orgin[0].toString() + "px " + scale_orgin[1].toString() + "px 0";
+                // console.log("scale_orgin[0]:"+scale_orgin[0].toString());
+                // console.log("orgin_client:"+(scale_orgin[0]+ canvas.offsetLeft).toString());
+                // console.log("e.clientX:"+e.clientX.toString());
+                // console.log("canvas.offsetLeft:"+(canvas.offsetLeft).toString());
+                scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+            }
+            else if (mirror_flag) {
+                // var scale_orgin_tempt=scale_orgin[0];
+                // scale_orgin[0] = (e.clientX - canvas.offsetLeft - scale_orgin[0]) / (-scale) + scale_orgin[0];
+                // scale_orgin[1] = (e.clientY - canvas.offsetTop - scale_orgin[1]) / (scale) + scale_orgin[1];
+                // scaleOriginKey = scale_orgin[0].toString() + "px " + scale_orgin[1].toString() + "px 0";
+                // console.log("canvas.offsetLeft:"+(canvas.offsetLeft).toString());
+                // console.log("e.clientX:"+e.clientX.toString());
+                // x_offset = (e.clientX-canvas.offsetLeft - scale_orgin[0]);
+                // console.log("scale_orgin_tempt:"+scale_orgin_tempt.toString());
+                // console.log("scale_orgin[0]:"+scale_orgin[0].toString());
+                // console.log("x_offset:"+x_offset.toString());
+                scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+            }
+            // canvas.style.transformOrigin = scaleOriginKey;
+            canvas.style.transform = scaleKey;
+            canvas_others.style.transform = scaleKey;
+            // canvas_others.style.transformOrigin = scaleOriginKey;
+        }
+        //Tool Mirror
+        function mirror() {
+            if (!mirror_flag) {
+                scale_xy = [-1, 1];
+                scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+                mirror_flag = true;
+                document.getElementById("mirror_pivot").checked = true;
+            }
+            else if (mirror_flag) {
+                scale_x = scale;
+                scale_xy = [1, 1];
+                scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+                mirror_flag = false;
+                document.getElementById("mirror_pivot").checked = false;
+            }
+            canvas.style.transform = scaleKey;
+            canvas_others.style.transform = scaleKey;
+        }
+        //Tool Save image by default name
+        async function saveimage() {
+            var link = document.createElement('a');
+            link.download = 'sharingsketch.png';
+            link.href = document.getElementById('can').toDataURL('image/png')
+            link.click();
+        }
+        //Tool Load image by upload png
+        async function loadimage(event) {
+            // var htmlCheck = document.getElementsByName("Checkhtml");
+            const reader = new FileReader();
+            reader.readAsDataURL(event.target.files[0]); 
+            reader.onload = function (Res) {
+                // htmlCheck[0].innerHTML=Res.target.result;
+                var img = new Image();
+                img.src = Res.target.result;
+                img.onload = function () {
+                    ctx.clearRect(0, 0, w, h);
+                    ctx.drawImage(img, 0, 0);
+                };
+            }
+        }
+        //Tool Pan
+        function panCanvas(res, e) {
+            if (res == 'down') {
+                x_old_origin = e.clientX;
+                y_old_origin = e.clientY;
+                x_offset_origin = x_offset;
+                y_offset_origin = y_offset;
+                pan_flag = true;
+            }
+            if (res == 'up') {
+                // console.log("pan up");
+                if (pan_flag) {
+                    x_offset = x_offset_origin + (x_offset / (scale * scale_xy[0]));
+                    y_offset = y_offset_origin + (y_offset / (scale * scale_xy[1]));
+                    translateKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+                    canvas.style.transform = translateKey;
+                    canvas_others.style.transform = translateKey;
+                    pan_flag = false;
+                }
+            }
+            if (res == 'move') {
+                if (pan_flag) {
+                    x_offset = e.clientX - x_old_origin;
+                    y_offset = e.clientY - y_old_origin;
+                    translateKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset_origin + (x_offset / (scale * scale_xy[0]))).toString() + "px," + (y_offset_origin + (y_offset / (scale * scale_xy[1]))).toString() + "px)";
+                    canvas.style.transform = translateKey;
+                    canvas_others.style.transform = translateKey;
+                }
+            }
+        }
+        //Tool Color Change
+        function color(obj) {
+            draw_flag = true;
+
+            switch (obj.id) {
+                case "green":
+                    x = "green";
+                    break;
+                case "blue":
+                    x = "blue";
+                    break;
+                case "red":
+                    x = "red";
+                    break;
+                case "yellow":
+                    x = "yellow";
+                    break;
+                case "orange":
+                    x = "orange";
+                    break;
+                case "black":
+                    x = "black";
+                    break;
+                case "black":
+                    x = "black";
+                    break;
+                case "erase":
+                    draw_flag = false;
+                    break;
+            }
+            updateToolInfo();
+        }
+        //Tool Change pointwidth(Pen/Eraser)
+        function updateToolInfo() {
+            if (draw_flag)
+                width_range.value = line_widths[0];
+            else if (!draw_flag)
+                width_range.value = line_widths[1];
+        }
+        //Sketch
+        function findxy(res, e, draw_flag) {
+            if (res == 'down') {
+                prevX = currX;
+                prevY = currY;
+                currX = e.clientX - canvas.offsetLeft;
+                currY = e.clientY - canvas.offsetTop;
+                flag = true;
+                dot_flag = true;
+                if (dot_flag) {
+                    ctx.beginPath();
+                    ctx.fillStyle = x;
+                    ctx.fillRect(currX * scale, currY * scale, 2 * e.pressure, 2 * e.pressure);
+                    ctx.closePath();
+                    dot_flag = false;
+                }
+            }
+            if (res == 'up' || res == "out") {
+                if (flag) {
+                    if (restore.length >= restore_max) { restore.shift(); }
+                    restore[restore.length] = ctx.getImageData(0, 0, w, h);
+                    updateCanvas();
+                }
+                flag = false;
+            }
+            if (res == 'move') {
+                if (flag) {
+                    prevX = currX;
+                    prevY = currY;
+                    currX = e.clientX - canvas.offsetLeft;
+                    currY = e.clientY - canvas.offsetTop;
+                    draw(e.pressure, draw_flag);
+                }
+            }
+        }
+        //Sketch sub draw function
+        function draw(pressure, draw_flag) {
+            if (draw_flag) {
+                ctx.globalCompositeOperation = "source-over";
+                ctx.strokeStyle = x;
+                ctx.lineCap = "round";
+                ctx.lineWidth = line_widths[0] * pressure;
+            }
+            else {
+                // ctx.strokeStyle = rgba(0,0,0,0.0);
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.lineWidth = line_widths[1];
+            }
+            ctx.beginPath();
+            ctx.moveTo((prevX - scale_orgin[0]) / (scale * scale_xy[0]) + scale_orgin[0] - x_offset, (prevY - scale_orgin[1]) / (scale * scale_xy[1]) + scale_orgin[1] - y_offset);
+            ctx.lineTo((currX - scale_orgin[0]) / (scale * scale_xy[0]) + scale_orgin[0] - x_offset, (currY - scale_orgin[1]) / (scale * scale_xy[1]) + scale_orgin[1] - y_offset);
+            // ctx.moveTo((prevX) / (scale * scale_xy[0]) - x_offset, (prevY) / (scale * scale_xy[1]) - y_offset);
+            // ctx.lineTo((currX) / (scale * scale_xy[0]) - x_offset, (currY) / (scale * scale_xy[1]) - y_offset);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        function erase_all() {
+            var m = confirm("Want to clear");
+            if (m) {
+                ctx.clearRect(0, 0, w, h);
+                document.getElementById("canvasimg").style.display = "none";
+            }
+        }
+        //Updatecanvas
+        function updateCanvas() {
+            socket.emit("new_img", canvas.toDataURL());
+        }
+    </script>
+
+</body>
+
+</html>
