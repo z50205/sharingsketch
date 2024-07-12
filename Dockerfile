@@ -8,7 +8,7 @@ COPY . /PSS
 
 WORKDIR /PSS
 
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirement.txt && pip install gunicorn && chmod 755 run_server.sh
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirement.txt && pip install gevent-websocket && pip install gunicorn && chmod 755 run_server.sh
 
 EXPOSE 8002
 

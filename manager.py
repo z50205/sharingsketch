@@ -1,11 +1,12 @@
 from flask import Flask
 from flask.cli import FlaskGroup
+from flask_cors import CORS
 from PSS import create_app,socketio
 # from twittor.models.user import User
 
 
 app = create_app()
-
+CORS(app,resources={r"/*": {"origins": "https://beamviewer.bizara.link"}})
 # socketio.run(app)
 # migrate = Migrate(app, db)
 

@@ -2,4 +2,4 @@
 
 
 
-gunicorn --bind=0.0.0.0:8001 --log-level info --workers 4 PSS.wsgi:application
+gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:8002 PSS.wsgi:application

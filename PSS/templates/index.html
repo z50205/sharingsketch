@@ -46,9 +46,7 @@
                 <ul id="members-list"></ul>
             </div>
         </div>
-        <div class="col" id="painting-area ">
-            <canvas id="can-others"
-                style="position:absolute;top:20%;left:25%;border:2px solid; touch-action: none;z-index: 1;"></canvas>
+        <div class="col" id="painting-area">
             <canvas id="can"
                 style="position:absolute;top:20%;left:25%;border:2px solid; touch-action: none;z-index: 1;"></canvas>
             <div class="row">
@@ -92,13 +90,19 @@
                                 black</div>
                         </div>
                         <div class="fw-bold">Eraser</div>
+                        <div class="col m-1 rounded-3" style="background:white;">
+                            <input type="checkbox" class="btn-check" id="erase" autocomplete="off"
+                                onclick="color(this)">
+                            <label class="btn btn-outline-secondary" for="erase" style="width:100%">Eraser</label><br>
+                        </div>
+                        <!-- <div class="fw-bold">Eraser</div>
                         <div class="col">
                             <div class="p-1 mb-1 rounded-3 text-black" style="background:white;border:2px solid"
                                 id="erase" onclick="color(this)">Eraser</div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
-                <div class="col-sm-2 rounded-3 align-middle" style=" position:relative;z-index: 6;">
+                <div class="col-sm-1 rounded-3 align-middle" style=" position:relative;z-index: 6;">
                     <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
                     <button type="button" class="btn btn-outline-primary" id="save_image"
                         onclick="saveimage()">save</button><br>
@@ -109,9 +113,17 @@
                     <input type="checkbox" class="btn-check" id="mirror_pivot" autocomplete="off" onclick="mirror()">
                     <label class="btn btn-outline-info" for="mirror_pivot">mirror</label><br>
                 </div>
+                <div class="col-sm-2" style=" position:relative;z-index: 6;">
+                    <h4>Shortcut keys</h4>
+                    <p>Mirror:Q<br>
+                        Pan:Space+Mouse(Pointer) Move<br>
+                        Undo:Ctrl+Z<br>
+                        Eraser:E<br>
+                        Pen:P<br></p>
+                </div>
             </div>
             <div class="col-sm-6" style=" position:relative;z-index: 6;">
-                <label for="customRange1" class="form-label">Example range</label>
+                <label for="customRange1" class="form-label">Line width</label>
                 <input type="range" class="form-range" id="width_range">
             </div>
         </div>
@@ -120,7 +132,8 @@
     <!-- Socketio Code -->
     <script>
         //Chatroom part
-        const socket = io({ autoConnect: false });
+        // const socket = io('https://beamviewer.bizara.link', { transports: ["websocket"], autoConnect: false });
+        const socket = io({ transports: ["websocket"], autoConnect: false });
         document.getElementById("join-btn").addEventListener("click", function () {
             let username = document.getElementById("userName").value;
             socket.connect();
@@ -136,16 +149,42 @@
                 sendMessage();
             }
         })
-        window.addEventListener("beforeunload", (event) => {
+        window.addEventListener("pagehide", (event) => {
             console.log('Leaving');
             bye();
         });
         function bye() {
             socket.emit("bye");
         }
+        socket.on("createNewCanvas", function (data) {
+            canvassids = data["canvassids"];
+            var allcanvases = document.getElementsByTagName('canvas');
+            var allcanvaseslength = allcanvases.length;
+            var canvaseParentNode = document.getElementById('painting-area');
+            for (i = 0; i < canvassids.length; i++) {
+                var newone_pivot = true;
+                for (ii = 0; ii < allcanvaseslength; ii++) {
+                    if (allcanvases[ii].id == canvassids[i] || self_sid == canvassids[i]) {
+                        newone_pivot = false;
+                    }
+                }
+                if (newone_pivot) {
+                    var newcanvas = document.createElement("canvas");
+                    newcanvas.style = "position:absolute;top:20%;left:25%;border:2px solid; touch-action: none;z-index: 1;"
+                    newcanvas.id = canvassids[i];
+                    newcanvas.height = h;
+                    newcanvas.width = w;
+                    newcanvas.className = "othermembercanvases";
+                    canvaseParentNode.insertBefore(newcanvas, canvas)
+                }
+            }
+        })
+        socket.on("leaveRemoveCanvas", function (data) {
+            leave_sid = data["LeaveSid"];
+            document.getElementById(leave_sid).remove();
+        })
         socket.on("memberslistUpdate", function (data) {
             memberslist = data["memberslist"];
-            console.log(memberslist[0]);
             let ul = document.getElementById("members-list");
             ul.innerHTML = "";
             for (i = 0; i < memberslist.length; i++) {
@@ -153,6 +192,9 @@
                 li.appendChild(document.createTextNode("member " + i + ":" + memberslist[i]));
                 ul.appendChild(li);
             }
+        })
+        socket.on("setSelfSid", function (data) {
+            self_sid = data["SelfSid"];
         })
         socket.on("chat", function (data) {
             let ul = document.getElementById("chat-messages");
@@ -169,6 +211,7 @@
             var img = new Image();
             img.src = data["updateimg"];
             img.onload = function () {
+                ctx_others = document.getElementById(data["UpdateSid"]).getContext("2d");
                 ctx_others.clearRect(0, 0, w, h);
                 ctx_others.drawImage(img, 0, 0);
             };
@@ -196,7 +239,7 @@
         line_widths_max = [100, 200, 0];//Set tools linewidth Maximum 1.pen；2.eraser 3.other(no _use)
         pan_flag = false;
         mirror_flag = false;
-        restore_max = 5;
+        restore_max = 10;
         var x = "black"
 
         //Init
@@ -206,19 +249,16 @@
             can_height = 1000;
             x_old_origin = 0;
             y_old_origin = 0;
+            self_sid = "";
             x_offset = 0;
             y_offset = 0;
             canvas = document.getElementById('can');
-            canvas_others = document.getElementById('can-others');
             fileUploader = document.getElementById("load_image");
             canvas.height = can_height;
-            canvas_others.height = can_height;
             canvas.width = can_width;
-            canvas_others.width = can_width;
             scale = 1.0;
             scale_xy = [1, 1];
             ctx = canvas.getContext("2d");
-            ctx_others = canvas_others.getContext("2d");
             w = canvas.width;
             h = canvas.height;
             scale_orgin = [w / 2, h / 2];
@@ -277,6 +317,12 @@
                 if (e.keyCode == 32) {
                     e.preventDefault;
                     space_pivot = true;
+                }
+                if (e.keyCode == 69) {
+                    color(document.getElementById('erase'));
+                }
+                if (e.keyCode == 80) {
+                    color(document.getElementById(x));
                 }
                 if (e.keyCode == 81) {
                     mirror();
@@ -352,7 +398,10 @@
             }
             // canvas.style.transformOrigin = scaleOriginKey;
             canvas.style.transform = scaleKey;
-            canvas_others.style.transform = scaleKey;
+            var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+            for (let i = 0; i < othercanvasessetting.length; i++) {
+                othercanvasessetting[i].style.transform = scaleKey;
+            }
             // canvas_others.style.transformOrigin = scaleOriginKey;
         }
         //Tool Mirror
@@ -371,7 +420,10 @@
                 document.getElementById("mirror_pivot").checked = false;
             }
             canvas.style.transform = scaleKey;
-            canvas_others.style.transform = scaleKey;
+            var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+            for (let i = 0; i < othercanvasessetting.length; i++) {
+                othercanvasessetting[i].style.transform = scaleKey;
+            }
         }
         //Tool Save image by default name
         async function saveimage() {
@@ -384,7 +436,7 @@
         async function loadimage(event) {
             // var htmlCheck = document.getElementsByName("Checkhtml");
             const reader = new FileReader();
-            reader.readAsDataURL(event.target.files[0]); 
+            reader.readAsDataURL(event.target.files[0]);
             reader.onload = function (Res) {
                 // htmlCheck[0].innerHTML=Res.target.result;
                 var img = new Image();
@@ -392,6 +444,7 @@
                 img.onload = function () {
                     ctx.clearRect(0, 0, w, h);
                     ctx.drawImage(img, 0, 0);
+                    updateCanvas();
                 };
             }
         }
@@ -411,7 +464,10 @@
                     y_offset = y_offset_origin + (y_offset / (scale * scale_xy[1]));
                     translateKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
                     canvas.style.transform = translateKey;
-                    canvas_others.style.transform = translateKey;
+                    var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+                    for (let i = 0; i < othercanvasessetting.length; i++) {
+                        othercanvasessetting[i].style.transform = translateKey;
+                    }
                     pan_flag = false;
                 }
             }
@@ -421,14 +477,17 @@
                     y_offset = e.clientY - y_old_origin;
                     translateKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset_origin + (x_offset / (scale * scale_xy[0]))).toString() + "px," + (y_offset_origin + (y_offset / (scale * scale_xy[1]))).toString() + "px)";
                     canvas.style.transform = translateKey;
-                    canvas_others.style.transform = translateKey;
+                    var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+                    for (let i = 0; i < othercanvasessetting.length; i++) {
+                        othercanvasessetting[i].style.transform = translateKey;
+                    }
                 }
             }
         }
         //Tool Color Change
         function color(obj) {
             draw_flag = true;
-
+            document.getElementById("erase").checked = false;
             switch (obj.id) {
                 case "green":
                     x = "green";
@@ -453,6 +512,7 @@
                     break;
                 case "erase":
                     draw_flag = false;
+                    document.getElementById("erase").checked = true;
                     break;
             }
             updateToolInfo();
