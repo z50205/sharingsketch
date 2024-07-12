@@ -8,6 +8,6 @@ def create_app():
     app.config["DEBUG"]=True
     app.config["SECRET_KEY"]="secret"
     app.add_url_rule('/','index',index,methods=['GET','POST'])
-    # socketio.init_app(app, cors_allowed_origins='https://beamviewer.bizara.link')
-    socketio.init_app(app)
+    socketio.init_app(app, cors_allowed_origins='https://beamviewer.bizara.link')
+    # socketio.init_app(app)
     return app

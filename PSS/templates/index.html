@@ -132,8 +132,8 @@
     <!-- Socketio Code -->
     <script>
         //Chatroom part
-        // const socket = io('https://beamviewer.bizara.link', { transports: ["websocket"], autoConnect: false });
-        const socket = io({ transports: ["websocket"], autoConnect: false });
+        const socket = io('https://beamviewer.bizara.link', { transports: ["websocket"], autoConnect: false });
+        // const socket = io({ transports: ["websocket"], autoConnect: false });
         document.getElementById("join-btn").addEventListener("click", function () {
             let username = document.getElementById("userName").value;
             socket.connect();
@@ -149,13 +149,14 @@
                 sendMessage();
             }
         })
-        window.addEventListener("pagehide", (event) => {
-            console.log('Leaving');
-            bye();
+
+        window.addEventListener('visibilitychange', (event) => {
+            if (document.visibilityState === 'visible') {
+                socket.emit("bye",false);
+            } else if (document.visibilityState === 'hidden') {
+                socket.emit("bye",true);
+            }
         });
-        function bye() {
-            socket.emit("bye");
-        }
         socket.on("createNewCanvas", function (data) {
             canvassids = data["canvassids"];
             var allcanvases = document.getElementsByTagName('canvas');
@@ -175,6 +176,8 @@
                     newcanvas.height = h;
                     newcanvas.width = w;
                     newcanvas.className = "othermembercanvases";
+                    newcanvas.className = "othermembercanvases";
+                    newcanvas.style.transform = translateKey;
                     canvaseParentNode.insertBefore(newcanvas, canvas)
                 }
             }
@@ -182,6 +185,9 @@
         socket.on("leaveRemoveCanvas", function (data) {
             leave_sid = data["LeaveSid"];
             document.getElementById(leave_sid).remove();
+        })
+        socket.on("initUpdateImg", function (data) {
+            socket.emit("new_img", canvas.toDataURL());
         })
         socket.on("memberslistUpdate", function (data) {
             memberslist = data["memberslist"];
@@ -193,8 +199,9 @@
                 ul.appendChild(li);
             }
         })
-        socket.on("setSelfSid", function (data) {
+        socket.on("join", function (data) {
             self_sid = data["SelfSid"];
+            socket.emit('update_old_content', self_sid);
         })
         socket.on("chat", function (data) {
             let ul = document.getElementById("chat-messages");
@@ -214,6 +221,7 @@
                 ctx_others = document.getElementById(data["UpdateSid"]).getContext("2d");
                 ctx_others.clearRect(0, 0, w, h);
                 ctx_others.drawImage(img, 0, 0);
+                document.getElementById(data["UpdateSid"]).style.transform = translateKey;
             };
             // canvas.getContext("2d").drawImage(img, 0, 0);
         })
@@ -256,6 +264,7 @@
             fileUploader = document.getElementById("load_image");
             canvas.height = can_height;
             canvas.width = can_width;
+            translateKey = "";
             scale = 1.0;
             scale_xy = [1, 1];
             ctx = canvas.getContext("2d");
