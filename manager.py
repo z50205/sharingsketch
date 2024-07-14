@@ -6,7 +6,8 @@ from PSS import create_app,socketio
 
 
 app = create_app()
-CORS(app,resources={r"/*": {"origins": "https://beamviewer.bizara.link"}})
+# CORS(app,resources={r"/*": {"origins": "https://beamviewer.bizara.link"}})
+CORS(app,resources={r"/*": {"origins": "http://52.195.89.113"}})
 # socketio.run(app)
 # migrate = Migrate(app, db)
 

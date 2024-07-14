@@ -104,6 +104,8 @@
                 </div>
                 <div class="col-sm-1 rounded-3 align-middle" style=" position:relative;z-index: 6;">
                     <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
+                    <input type="checkbox" class="btn-check" id="bye_button" autocomplete="off" onclick="bye()">
+                    <label class="btn btn-outline-warning" for="bye_button">Leave</label><br>
                     <button type="button" class="btn btn-outline-primary" id="save_image"
                         onclick="saveimage()">save</button><br>
                     <label for="load_image" class="btn btn-outline-success">load</label><br>
@@ -119,6 +121,7 @@
                         Pan:Space+Mouse(Pointer) Move<br>
                         Undo:Ctrl+Z<br>
                         Eraser:E<br>
+                        Zoom:Mouse Wheel<br>
                         Pen:P<br></p>
                 </div>
             </div>
@@ -132,13 +135,16 @@
     <!-- Socketio Code -->
     <script>
         //Chatroom part
-        const socket = io('https://beamviewer.bizara.link', { transports: ["websocket"], autoConnect: false });
+        // const socket = io('https://beamviewer.bizara.link', { transports: ["websocket"], autoConnect: false });
+        const socket = io('http://52.195.89.113', { transports: ["websocket"], autoConnect: false });
         // const socket = io({ transports: ["websocket"], autoConnect: false });
         document.getElementById("join-btn").addEventListener("click", function () {
             let username = document.getElementById("userName").value;
             socket.connect();
             socket.on("connect", function () {
                 socket.emit("user_join", username);
+                document.getElementById("bye_button").checked = true;
+                document.getElementById("bye_button").disabled = false;
             })
             document.getElementById("chat").style.display = "block";
             document.getElementById("members").style.display = "block";
@@ -149,14 +155,17 @@
                 sendMessage();
             }
         })
-
-        window.addEventListener('visibilitychange', (event) => {
-            if (document.visibilityState === 'visible') {
-                socket.emit("bye",false);
-            } else if (document.visibilityState === 'hidden') {
-                socket.emit("bye",true);
-            }
-        });
+        // let isVisibilityChangeCompleted = false;
+        // window.addEventListener('visibilitychange', (event) => {
+        //     console.log(socket.connected);
+        //     console.log(document.visibilityState === 'visible'&&socket.connected);
+        //     if (document.visibilityState === 'visible'&&socket.connected) {
+        //         socket.emit("bye",false);
+        //         isVisibilityChangeCompleted==true;
+        //     } else if (document.visibilityState === 'hidden') {
+        //         socket.emit("bye",true);
+        //     }
+        // });
         socket.on("createNewCanvas", function (data) {
             canvassids = data["canvassids"];
             var allcanvases = document.getElementsByTagName('canvas');
@@ -184,7 +193,16 @@
         })
         socket.on("leaveRemoveCanvas", function (data) {
             leave_sid = data["LeaveSid"];
-            document.getElementById(leave_sid).remove();
+            if (leave_sid == self_sid) {
+                document.getElementById("bye_button").checked = false;
+                document.getElementById("bye_button").disabled = true;
+                document.getElementById("chat").style.display = "none";
+                document.getElementById("members").style.display = "none";
+                document.getElementById("landing").style.display = "block";
+                socket.disconnect();
+            }
+            else
+                document.getElementById(leave_sid).remove();
         })
         socket.on("initUpdateImg", function (data) {
             socket.emit("new_img", canvas.toDataURL());
@@ -201,7 +219,7 @@
         })
         socket.on("join", function (data) {
             self_sid = data["SelfSid"];
-            socket.emit('update_old_content', self_sid);
+            socket.emit('update_old_content');
         })
         socket.on("chat", function (data) {
             let ul = document.getElementById("chat-messages");
@@ -229,6 +247,9 @@
             let message = document.getElementById("message").value;
             socket.emit("new_message", message);
             document.getElementById("message").value = "";
+        }
+        function bye() {
+            socket.emit("bye");
         }
     </script>
     <!-- Client Render Code -->
