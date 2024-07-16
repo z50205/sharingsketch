@@ -136,16 +136,10 @@
     <script>
         //Chatroom part
         // const socket = io('https://beamviewer.bizara.link', { transports: ["websocket"], autoConnect: false });
-        const socket = io('http://52.195.89.113', { transports: ["websocket"], autoConnect: false });
-        // const socket = io({ transports: ["websocket"], autoConnect: false });
+        // const socket = io('http://52.195.89.113', { transports: ["websocket"], autoConnect: false });
+        const socket = io({ transports: ["websocket"], autoConnect: false });
         document.getElementById("join-btn").addEventListener("click", function () {
-            let username = document.getElementById("userName").value;
             socket.connect();
-            socket.on("connect", function () {
-                socket.emit("user_join", username);
-                document.getElementById("bye_button").checked = true;
-                document.getElementById("bye_button").disabled = false;
-            })
             document.getElementById("chat").style.display = "block";
             document.getElementById("members").style.display = "block";
             document.getElementById("landing").style.display = "none";
@@ -166,6 +160,12 @@
         //         socket.emit("bye",true);
         //     }
         // });
+        socket.on("connect", function () {
+            let username = document.getElementById("userName").value;
+            socket.emit("user_join", username);
+            document.getElementById("bye_button").checked = true;
+            document.getElementById("bye_button").disabled = false;
+        })
         socket.on("createNewCanvas", function (data) {
             canvassids = data["canvassids"];
             var allcanvases = document.getElementsByTagName('canvas');
@@ -186,13 +186,15 @@
                     newcanvas.width = w;
                     newcanvas.className = "othermembercanvases";
                     newcanvas.className = "othermembercanvases";
-                    newcanvas.style.transform = translateKey;
+                    newcanvas.style.transform = scaleKey;
                     canvaseParentNode.insertBefore(newcanvas, canvas)
                 }
             }
         })
         socket.on("leaveRemoveCanvas", function (data) {
             leave_sid = data["LeaveSid"];
+            console.log("leave_sid :" + leave_sid);
+            console.log("self_sid :" + self_sid);
             if (leave_sid == self_sid) {
                 document.getElementById("bye_button").checked = false;
                 document.getElementById("bye_button").disabled = true;
@@ -200,12 +202,17 @@
                 document.getElementById("members").style.display = "none";
                 document.getElementById("landing").style.display = "block";
                 socket.disconnect();
+                var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+                for (let i = 0; i < othercanvasessetting.length; i++) {
+                    othercanvasessetting[i].remove();
+                }
             }
-            else
+            else {
                 document.getElementById(leave_sid).remove();
+            }
         })
         socket.on("initUpdateImg", function (data) {
-            socket.emit("new_img", canvas.toDataURL());
+            socket.emit("init_new_img", canvas.toDataURL());
         })
         socket.on("memberslistUpdate", function (data) {
             memberslist = data["memberslist"];
@@ -219,7 +226,9 @@
         })
         socket.on("join", function (data) {
             self_sid = data["SelfSid"];
+            console.log(self_sid);
             socket.emit('update_old_content');
+            updateCanvas();
         })
         socket.on("chat", function (data) {
             let ul = document.getElementById("chat-messages");
@@ -239,7 +248,7 @@
                 ctx_others = document.getElementById(data["UpdateSid"]).getContext("2d");
                 ctx_others.clearRect(0, 0, w, h);
                 ctx_others.drawImage(img, 0, 0);
-                document.getElementById(data["UpdateSid"]).style.transform = translateKey;
+                document.getElementById(data["UpdateSid"]).style.transform = scaleKey;
             };
             // canvas.getContext("2d").drawImage(img, 0, 0);
         })
@@ -268,7 +277,7 @@
         line_widths_max = [100, 200, 0];//Set tools linewidth Maximum 1.pen；2.eraser 3.other(no _use)
         pan_flag = false;
         mirror_flag = false;
-        restore_max = 10;
+        restore_max = 20;
         var x = "black"
 
         //Init
@@ -282,10 +291,11 @@
             x_offset = 0;
             y_offset = 0;
             canvas = document.getElementById('can');
+            active_canvas_name = 'can';
             fileUploader = document.getElementById("load_image");
             canvas.height = can_height;
             canvas.width = can_width;
-            translateKey = "";
+            scaleKey = "";
             scale = 1.0;
             scale_xy = [1, 1];
             ctx = canvas.getContext("2d");
@@ -300,7 +310,7 @@
             custom_color = document.getElementById("favcolor");
 
 
-            //Tool Cancel defaultevent
+            //Cancel defaultevent
             window.addEventListener("wheel", e => e.preventDefault(), { passive: false })
             window.addEventListener('keydown', function (e) {
                 if (e.keyCode == 32 && e.target == document.body) {
@@ -472,8 +482,11 @@
                 var img = new Image();
                 img.src = Res.target.result;
                 img.onload = function () {
+                    ctx.globalCompositeOperation = "source-over";
                     ctx.clearRect(0, 0, w, h);
                     ctx.drawImage(img, 0, 0);
+                    console.log('drawImage on load')
+                    console.log(img)
                     updateCanvas();
                 };
             }
@@ -492,11 +505,11 @@
                 if (pan_flag) {
                     x_offset = x_offset_origin + (x_offset / (scale * scale_xy[0]));
                     y_offset = y_offset_origin + (y_offset / (scale * scale_xy[1]));
-                    translateKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
-                    canvas.style.transform = translateKey;
+                    scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+                    canvas.style.transform = scaleKey;
                     var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
                     for (let i = 0; i < othercanvasessetting.length; i++) {
-                        othercanvasessetting[i].style.transform = translateKey;
+                        othercanvasessetting[i].style.transform = scaleKey;
                     }
                     pan_flag = false;
                 }
@@ -505,11 +518,11 @@
                 if (pan_flag) {
                     x_offset = e.clientX - x_old_origin;
                     y_offset = e.clientY - y_old_origin;
-                    translateKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset_origin + (x_offset / (scale * scale_xy[0]))).toString() + "px," + (y_offset_origin + (y_offset / (scale * scale_xy[1]))).toString() + "px)";
-                    canvas.style.transform = translateKey;
+                    scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset_origin + (x_offset / (scale * scale_xy[0]))).toString() + "px," + (y_offset_origin + (y_offset / (scale * scale_xy[1]))).toString() + "px)";
+                    canvas.style.transform = scaleKey;
                     var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
                     for (let i = 0; i < othercanvasessetting.length; i++) {
-                        othercanvasessetting[i].style.transform = translateKey;
+                        othercanvasessetting[i].style.transform = scaleKey;
                     }
                 }
             }

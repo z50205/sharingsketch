@@ -2,17 +2,20 @@ from flask import request
 from flask_socketio import emit
 from PSS.extensions import socketio
 import threading
-
+from threading import Lock
 
 users={}
 message={}
 canves={}
 typing_timers={}
-done_typing_interval =60*10
+done_typing_interval =20
+typing_timers_lock = Lock()
 
 @socketio.on("connect")
 def handle_connect():
     print("Client Connected!")
+    start_typing_timer(request.sid)
+    print(f'typing_timer {request.sid} start')
     emit ("join",{"SelfSid":request.sid})
 
 @socketio.on("user_join")
@@ -21,54 +24,53 @@ def joinUser(username):
     users[request.sid]=username
     memberlist=list(users.values())
     canvassids=list(users.keys())
-    start_typing_timer(request.sid)
-    print(canvassids)
     emit ("memberslistUpdate",{"memberslist":memberlist},broadcast=True)
     emit ("createNewCanvas",{"canvassids":canvassids},broadcast=True)
 
 @socketio.on("new_message")
 def newMessage(message):
-    print(f"New message:{message}")
     heartbeat(request.sid)
     emit("chat",{"message":message,"username":users[request.sid]},broadcast=True)
 
 @socketio.on("new_img")
 def newImg(img):
-    print(f"New ctx update!")
     heartbeat(request.sid)
+    # print("updateImg")
     emit("updateImg",{"updateimg":img,"UpdateSid":request.sid},broadcast=True, include_self=False)
+
+@socketio.on("init_new_img")
+def initNewImg(img):
+    # print("updateImg")
+    emit("updateImg",{"updateimg":img,"UpdateSid":request.sid},broadcast=True, include_self=False)
+
 
 @socketio.on("bye")
 def bye():
     delete_user(request.sid)
+    typing_timers[request.sid].cancel()
 
 def start_typing_timer(sid):
     typing_timers[sid] = threading.Timer(done_typing_interval, delete_user, args=[sid])
     typing_timers[sid].start()
-    print(f'typing_timer {id} start')
-
-def heartbeat_client(sid):
-    if sid in typing_timers:
-        typing_timers[sid].cancel()
-        print(f'previous typing_timer {sid} stop')
-    start_typing_timer(sid)
-    print(f'typing_timer {sid} heartbeat')
 
 def heartbeat(sid):
-    if sid in typing_timers:
-        typing_timers[sid].cancel()
-        print(f'previous typing_timer {sid} stop')
+    print(f"typing_timers {typing_timers}")
+    typing_timers[sid].cancel()
+    print(f'typing_timer {sid} stop')
+        # print(f'previous typing_timer {sid} stop')
     start_typing_timer(sid)
-    print(f'typing_timer {sid} heartbeat')
+    print(f'typing_timer {sid} restart')
+    # print(f'typing_timer {sid} heartbeat')
+    # print(typing_timers)
 
 def delete_user(sid):
-    username=users[sid] 
-    del users[sid]
-    print(f"User {username}sid {sid} leaved!")
-    print(f'Deleted user with sid={sid}')
-    memberlist=list(users.values())
-    socketio.emit ("memberslistUpdate",{"memberslist":memberlist})
-    socketio.emit ("leaveRemoveCanvas",{"LeaveSid":sid})
+    with typing_timers_lock:
+        print(users)
+        del users[sid]
+        print(f'Deleted user with sid={sid}')
+        memberlist=list(users.values())
+        socketio.emit ("memberslistUpdate",{"memberslist":memberlist})
+        socketio.emit ("leaveRemoveCanvas",{"LeaveSid":sid})
 
 @socketio.on('update_old_content')
 def updateOldContent():
