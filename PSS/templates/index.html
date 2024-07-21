@@ -13,11 +13,112 @@
     </style>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='index.css' )}}">
 </head>
 
-<body onload="init()">
-    <div class="row">
-        <div class="col-sm-3" style=" position:relative;z-index: 6; background-color: rgb(255, 229, 211);">
+<body onload="init()" style="background-color: rgb(179, 179, 179);">
+    <div class="container-fluid">
+        <div class="item">
+            <div class="col rounded-3 border border-info"
+                style="background:rgb(237, 255, 254); position:relative;z-index: 100;">
+                <div class="row">
+                    <h4>Choose color</h4>
+                    <div class="fw-bold">Color</div>
+                    <div>
+                        <input type="color" id="favcolor" value="#ff0000">
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:green;" id="green"
+                            onclick="color(this)">
+                            green</div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:blue;" id="blue"
+                            onclick="color(this)">
+                            blue
+                        </div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:red;" id="red"
+                            onclick="color(this)">
+                            red
+                        </div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-black" style="background:yellow;" id="yellow"
+                            onclick="color(this)">
+                            yellow</div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:orange;" id="orange"
+                            onclick="color(this)">
+                            orange</div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:black;" id="black"
+                            onclick="color(this)">
+                            black</div>
+                    </div>
+                    <div class="fw-bold">Eraser</div>
+                    <div>
+                        <input type="checkbox" class="btn-check" id="erase" autocomplete="off" onclick="color(this)">
+                        <label class="btn btn-outline-secondary" for="erase" style="width:100%">Eraser</label><br>
+                    </div>
+                    <div class="col" style=" position:relative;z-index: 100;">
+                        <label for="customRange1" class="form-label">Line width</label>
+                        <input type="range" class="form-range" id="width_range">
+                    </div>
+                    <!-- <div class="fw-bold">Eraser</div>
+                        <div class="col">
+                            <div class="p-1 mb-1 rounded-3 text-black" style="background:white;border:2px solid"
+                                id="erase" onclick="color(this)">Eraser</div>
+                        </div> -->
+                </div>
+            </div>
+            <div class="col rounded-3 align-middle" style="background:rgb(255, 249, 237); position:relative;z-index: 100;">
+                <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
+                <h4>Tool</h4>
+                <div id="revise_hide">
+                    <input type="checkbox" class="btn-check" id="bye_button" autocomplete="off" onclick="bye()">
+                    <label class="btn btn-outline-warning" for="bye_button">Leave</label><br>
+                    <button type="button" class="btn btn-outline-primary" id="save_image"
+                        onclick="saveimage()">save</button><br>
+                    <label for="load_image" class="btn btn-outline-success">load</label><br>
+                    <input id="load_image" style="display: none;" type="file" />
+                    <button type="button" class="btn btn-outline-danger" id="clr"
+                        onclick="erase_all()">clear</button><br>
+                    <input type="checkbox" class="btn-check" id="mirror_pivot" autocomplete="off" onclick="mirror()">
+                    <label class="btn btn-outline-info" for="mirror_pivot">mirror</label><br>
+                </div>
+                <button class="btn btn-outline-primary" id="revise_button" onclick="revise_start()">revise</button>
+            </div>
+            <div class="col rounded-3 align-middle" style="background:rgb(255, 249, 237); position:relative;z-index: 100;">
+                <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
+                <h4>Layer</h4>
+                <div id="revise_hide">
+                    <img><br>
+                </div>
+                <button class="btn btn-outline-primary" id="revise_button" onclick="revise_start()">revise</button>
+            </div>
+            <div class="col" style="background:rgb(232, 232, 232);position:relative;z-index: 100;">
+                <h4>Shortcut</h4>
+                <p>Mirror:Q<br>
+                    Pan:Space+Mouse(Pointer) Move<br>
+                    Undo:Ctrl+Z<br>
+                    Eraser:E<br>
+                    Zoom:Mouse Wheel<br>
+                    Pen:P<br></p>
+            </div>
+        </div>
+        <div class="item" id="painting-area">
+            <canvas id="middle" style="position:absolute;border:0px solid; touch-action: none;z-index: 80;"></canvas>
+            <canvas id="can" style="position:absolute;border:0px solid; touch-action: none;z-index: 10;"></canvas>
+            <div id="bg"
+                style="position:absolute;width:2000px;height:2000px;border:0px solid;border-style: dashed;border-color: rgb(255, 255, 255);background-color: rgb(255, 255, 255); touch-action: none;z-index: 0;">
+            </div>
+        </div>
+        <div class="item" style=" position:relative;z-index: 100; background-color: rgb(255, 229, 211);">
+            <!-- col-sm-1 -->
             <h1>Sharing Sketch</h1>
             <div id="landing">
                 <div class="form-group row">
@@ -46,91 +147,6 @@
                 <ul id="members-list"></ul>
             </div>
         </div>
-        <div class="col" id="painting-area">
-            <canvas id="can"
-                style="position:absolute;top:20%;left:25%;border:2px solid; touch-action: none;z-index: 1;"></canvas>
-            <div class="row">
-                <div class="col-sm-6 rounded-3 border border-info"
-                    style="background:rgb(237, 255, 254); position:relative;z-index: 6;">
-                    <div class="row">
-                        <div class="fw-bold">Choose Color</div>
-                        <div class="col">
-                            <input type="color" id="favcolor" value="#ff0000">
-                        </div>
-                        <div class="col">
-                            <div class="p-1 mb-1 rounded-3 text-white" style="background:green;" id="green"
-                                onclick="color(this)">
-                                green</div>
-                        </div>
-                        <div class="col">
-                            <div class="p-1 mb-1 rounded-3 text-white" style="background:blue;" id="blue"
-                                onclick="color(this)">
-                                blue
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="p-1 mb-1 rounded-3 text-white" style="background:red;" id="red"
-                                onclick="color(this)">
-                                red
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="p-1 mb-1 rounded-3 text-black" style="background:yellow;" id="yellow"
-                                onclick="color(this)">
-                                yellow</div>
-                        </div>
-                        <div class="col">
-                            <div class="p-1 mb-1 rounded-3 text-white" style="background:orange;" id="orange"
-                                onclick="color(this)">
-                                orange</div>
-                        </div>
-                        <div class="col">
-                            <div class="p-1 mb-1 rounded-3 text-white" style="background:black;" id="black"
-                                onclick="color(this)">
-                                black</div>
-                        </div>
-                        <div class="fw-bold">Eraser</div>
-                        <div class="col m-1 rounded-3" style="background:white;">
-                            <input type="checkbox" class="btn-check" id="erase" autocomplete="off"
-                                onclick="color(this)">
-                            <label class="btn btn-outline-secondary" for="erase" style="width:100%">Eraser</label><br>
-                        </div>
-                        <!-- <div class="fw-bold">Eraser</div>
-                        <div class="col">
-                            <div class="p-1 mb-1 rounded-3 text-black" style="background:white;border:2px solid"
-                                id="erase" onclick="color(this)">Eraser</div>
-                        </div> -->
-                    </div>
-                </div>
-                <div class="col-sm-1 rounded-3 align-middle" style=" position:relative;z-index: 6;">
-                    <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
-                    <input type="checkbox" class="btn-check" id="bye_button" autocomplete="off" onclick="bye()">
-                    <label class="btn btn-outline-warning" for="bye_button">Leave</label><br>
-                    <button type="button" class="btn btn-outline-primary" id="save_image"
-                        onclick="saveimage()">save</button><br>
-                    <label for="load_image" class="btn btn-outline-success">load</label><br>
-                    <input id="load_image" style="display: none;" type="file" />
-                    <button type="button" class="btn btn-outline-danger" id="clr"
-                        onclick="erase_all()">clear</button><br>
-                    <input type="checkbox" class="btn-check" id="mirror_pivot" autocomplete="off" onclick="mirror()">
-                    <label class="btn btn-outline-info" for="mirror_pivot">mirror</label><br>
-                </div>
-                <div class="col-sm-2" style=" position:relative;z-index: 6;">
-                    <h4>Shortcut keys</h4>
-                    <p>Mirror:Q<br>
-                        Pan:Space+Mouse(Pointer) Move<br>
-                        Undo:Ctrl+Z<br>
-                        Eraser:E<br>
-                        Zoom:Mouse Wheel<br>
-                        Pen:P<br></p>
-                </div>
-            </div>
-            <div class="col-sm-6" style=" position:relative;z-index: 6;">
-                <label for="customRange1" class="form-label">Line width</label>
-                <input type="range" class="form-range" id="width_range">
-            </div>
-        </div>
-
     </div>
     <!-- Socketio Code -->
     <script>
@@ -180,11 +196,12 @@
                 }
                 if (newone_pivot) {
                     var newcanvas = document.createElement("canvas");
-                    newcanvas.style = "position:absolute;top:20%;left:25%;border:2px solid; touch-action: none;z-index: 1;"
+                    newcanvas.style = "position:absolute;border:0px solid; touch-action: none;z-index: 1;"
+                    newcanvas.style.top = top_key;
+                    newcanvas.style.left = left_key;
                     newcanvas.id = canvassids[i];
                     newcanvas.height = h;
                     newcanvas.width = w;
-                    newcanvas.className = "othermembercanvases";
                     newcanvas.className = "othermembercanvases";
                     newcanvas.style.transform = scaleKey;
                     canvaseParentNode.insertBefore(newcanvas, canvas)
@@ -203,9 +220,14 @@
                 document.getElementById("landing").style.display = "block";
                 socket.disconnect();
                 var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
-                for (let i = 0; i < othercanvasessetting.length; i++) {
-                    othercanvasessetting[i].remove();
+                console.log(othercanvasessetting.length);
+                while (othercanvasessetting.length > 0) {
+                    othercanvasessetting[0].remove();
                 }
+                // for (let i = 0; i < othercanvasessetting.length; i++) {
+                //     othercanvasessetting[0].remove();
+                //     console.log(othercanvasessetting[0]);
+                // }
             }
             else {
                 document.getElementById(leave_sid).remove();
@@ -270,7 +292,22 @@
             prevY = 0,
             currY = 0,
             dot_flag = false;
-        draw_flag = true;
+        var first_choose = true;
+        draw_flag = true;//pen or eraser
+        var canvas = document.getElementById('can');//main canvas
+        var ctx = canvas.getContext("2d");//main canvas content
+        var can_mid = document.getElementById('middle');//For modify tool using a middle layer 
+        var ctx_mid = can_mid.getContext("2d");//middle layer content
+        var can_revise = document.createElement("canvas");//For modify tool using a final revise layer 
+        var revise_button = document.getElementById("revise_button");//final revise layer content
+        var background = document.getElementById("bg");//bg
+        var region = new Path2D();//For modify tool using a path 
+        var scaleKey = "";//For pan and scale information
+        var scale = 1.0;
+        var scale_xy = [1, 1];
+        var w = 2000;
+        var h = 2000;
+        var scale_orgin = [w / 2, h / 2];
 
         //Drawtool variables
         line_widths = [2, 10, 0];//Set tools linewidth 1.pen；2.eraser 3.other(no _use)
@@ -283,25 +320,28 @@
         //Init
         function init() {
             //Canvas variables
-            can_width = 1000;
-            can_height = 1000;
             x_old_origin = 0;
             y_old_origin = 0;
             self_sid = "";
             x_offset = 0;
             y_offset = 0;
-            canvas = document.getElementById('can');
             active_canvas_name = 'can';
             fileUploader = document.getElementById("load_image");
-            canvas.height = can_height;
-            canvas.width = can_width;
-            scaleKey = "";
-            scale = 1.0;
-            scale_xy = [1, 1];
-            ctx = canvas.getContext("2d");
-            w = canvas.width;
-            h = canvas.height;
-            scale_orgin = [w / 2, h / 2];
+            canvas.height = h;
+            canvas.width = w;
+            can_mid.height = h;
+            can_mid.width = w;
+            background.height = h;
+            background.width = w;
+            can_mid.style.display = "none";
+            top_key = (window.innerHeight / 2 - h / 2).toString() + 'px';
+            left_key = (window.innerWidth / 2 - w / 2).toString() + 'px';
+            canvas.style.top = top_key;
+            canvas.style.left = left_key;
+            can_mid.style.top = top_key;
+            can_mid.style.left = left_key;
+            background.style.top = top_key;
+            background.style.left = left_key;
 
             //Tool variables
             space_pivot = false;
@@ -339,7 +379,10 @@
                     findxy('up', e, draw_flag)
             }, false);
             canvas.addEventListener("pointerout", function (e) {
-                findxy('out', e, draw_flag)
+                if (space_pivot)
+                    panCanvas('out', e)
+                else
+                    findxy('out', e, draw_flag)
             }, false);
 
             //Tool Change pointerwidth eventlistener
@@ -354,16 +397,24 @@
                 e.preventDefault;
                 if (e.ctrlKey && e.keyCode == 90)
                     backLastStep();
+                //keycode-space
                 if (e.keyCode == 32) {
                     e.preventDefault;
                     space_pivot = true;
                 }
+                //keycode-E
                 if (e.keyCode == 69) {
                     color(document.getElementById('erase'));
                 }
+                //keycode-M
+                if (e.keyCode == 77) {
+                    mirror();
+                }
+                //keycode-P
                 if (e.keyCode == 80) {
                     color(document.getElementById(x));
                 }
+                //keycode-Q
                 if (e.keyCode == 81) {
                     mirror();
                 }
@@ -404,12 +455,12 @@
         function zoom_in(e) {
             // ctx.scale(0.5, 0.5);
             // canvas.height=2*h;
-            if (0.5 <= scale <= 3) {
+            if (0.1 <= scale <= 3) {
                 scale += e.deltaY * -0.001;
                 if (scale > 3)
                     scale = 3;
-                if (scale < 0.5)
-                    scale = 0.5;
+                if (scale < 0.3)
+                    scale = 0.3;
             }
 
 
@@ -438,6 +489,8 @@
             }
             // canvas.style.transformOrigin = scaleOriginKey;
             canvas.style.transform = scaleKey;
+            can_mid.style.transform = scaleKey;
+            background.style.transform = scaleKey;
             var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
             for (let i = 0; i < othercanvasessetting.length; i++) {
                 othercanvasessetting[i].style.transform = scaleKey;
@@ -460,6 +513,8 @@
                 document.getElementById("mirror_pivot").checked = false;
             }
             canvas.style.transform = scaleKey;
+            can_mid.style.transform = scaleKey;
+            background.style.transform = scaleKey;
             var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
             for (let i = 0; i < othercanvasessetting.length; i++) {
                 othercanvasessetting[i].style.transform = scaleKey;
@@ -485,8 +540,8 @@
                     ctx.globalCompositeOperation = "source-over";
                     ctx.clearRect(0, 0, w, h);
                     ctx.drawImage(img, 0, 0);
-                    console.log('drawImage on load')
-                    console.log(img)
+                    console.log(img);
+                    restore[restore.length] = ctx.getImageData(0, 0, w, h);
                     updateCanvas();
                 };
             }
@@ -500,13 +555,15 @@
                 y_offset_origin = y_offset;
                 pan_flag = true;
             }
-            if (res == 'up') {
+            if (res == 'up' || res == 'out') {
                 // console.log("pan up");
                 if (pan_flag) {
                     x_offset = x_offset_origin + (x_offset / (scale * scale_xy[0]));
                     y_offset = y_offset_origin + (y_offset / (scale * scale_xy[1]));
                     scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
                     canvas.style.transform = scaleKey;
+                    can_mid.style.transform = scaleKey;
+                    background.style.transform = scaleKey;
                     var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
                     for (let i = 0; i < othercanvasessetting.length; i++) {
                         othercanvasessetting[i].style.transform = scaleKey;
@@ -520,6 +577,8 @@
                     y_offset = e.clientY - y_old_origin;
                     scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset_origin + (x_offset / (scale * scale_xy[0]))).toString() + "px," + (y_offset_origin + (y_offset / (scale * scale_xy[1]))).toString() + "px)";
                     canvas.style.transform = scaleKey;
+                    can_mid.style.transform = scaleKey;
+                    background.style.transform = scaleKey;
                     var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
                     for (let i = 0; i < othercanvasessetting.length; i++) {
                         othercanvasessetting[i].style.transform = scaleKey;
@@ -636,7 +695,7 @@
             socket.emit("new_img", canvas.toDataURL());
         }
     </script>
-
+    <script src={{url_for('static',filename='mod_function.js' )}}></script>
 </body>
 
 </html>

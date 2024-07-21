@@ -1,0 +1,15 @@
+.container-fluid{
+    display:flex;
+
+}
+.item{
+    width:100px;
+}
+
+.item:nth-child(2){
+    flex:1;
+}
+.item:last-child{
+    width:200px;
+    margin-left:auto;
+}

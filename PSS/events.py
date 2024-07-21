@@ -8,7 +8,7 @@ users={}
 message={}
 canves={}
 typing_timers={}
-done_typing_interval =20
+done_typing_interval =60*10
 typing_timers_lock = Lock()
 
 @socketio.on("connect")
@@ -47,7 +47,6 @@ def initNewImg(img):
 @socketio.on("bye")
 def bye():
     delete_user(request.sid)
-    typing_timers[request.sid].cancel()
 
 def start_typing_timer(sid):
     typing_timers[sid] = threading.Timer(done_typing_interval, delete_user, args=[sid])
@@ -64,6 +63,7 @@ def heartbeat(sid):
     # print(typing_timers)
 
 def delete_user(sid):
+    typing_timers[sid].cancel()
     with typing_timers_lock:
         print(users)
         del users[sid]
