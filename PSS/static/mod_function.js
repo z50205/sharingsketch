@@ -161,7 +161,7 @@ function choose_area() {
     ctx_mid.save();
     ctx_mid.clearRect(0, 0, can_mid.width, can_mid.height);
     ctx_mid.clip(region);
-    ctx_mid.drawImage(canvas, 0, 0);
+    ctx_mid.drawImage(can_active, 0, 0);
     ctx_mid.restore();
     var canvaseParentNode = document.getElementById('painting-area');
     can_revise.id = "temp";
@@ -177,19 +177,19 @@ function choose_area() {
     can_revise.style.transform = "scale(" + (m_scale[0] * scale_xy[0]).toString() + "," + (m_scale[1] * scale_xy[1]).toString() + ") " + "translate(" + (m_x_offset).toString() + "px," + (m_y_offset).toString() + "px)";
     // ctx_mid.clearRect(0, 0, can_mid.width, can_mid.height);
     can_mid.style.display = "none";
-    ctx.save();
-    ctx.clip(region);
-    ctx.clearRect(0, 0, can.width, can.height);
-    ctx.restore();
+    ctx_active.save();
+    ctx_active.clip(region);
+    ctx_active.clearRect(0, 0, can.width, can.height);
+    ctx_active.restore();
     revise_button.onclick = writedown;
     revise_button.innerHTML = "confirm";
 }
 function writedown() {
     x_l = can_revise.offsetLeft + can_revise.width / 2 + m_x_offset * m_scale[0] * scale_xy[0] - m_scale[0] * scale_xy[0] * can_revise.width / 2 - canvas.offsetLeft;
     y_l = can_revise.offsetTop + can_revise.height / 2 + m_y_offset * m_scale[1] * scale_xy[1] - m_scale[1] * scale_xy[1] * can_revise.height / 2 - canvas.offsetTop;
-    ctx.globalCompositeOperation = "source-over";
+    ctx_active.globalCompositeOperation = "source-over";
     //ctx.drawImage(can_revise, 0, 0, can_revise.width, can_revise.height, change_to_local(x_l, scale_orgin[0], scale, scale_xy[0], x_offset), change_to_local(y_l, scale_orgin[1], scale, scale_xy[1], y_offset), can_revise.width * m_scale[0] / scale, can_revise.height * m_scale[1] / scale,);//distortion
-    ctx.drawImage(can_mid, min_x, min_y, (max_x - min_x), (max_y - min_y), change_to_local(x_l, scale_orgin[0], scale, scale_xy[0], x_offset), change_to_local(y_l, scale_orgin[1], scale, scale_xy[1], y_offset), can_revise.width * m_scale[0] / scale, can_revise.height * m_scale[1] / scale,);//distortion
+    ctx_active.drawImage(can_mid, min_x, min_y, (max_x - min_x), (max_y - min_y), change_to_local(x_l, scale_orgin[0], scale, scale_xy[0], x_offset), change_to_local(y_l, scale_orgin[1], scale, scale_xy[1], y_offset), can_revise.width * m_scale[0] / scale, can_revise.height * m_scale[1] / scale,);//distortion
     ctx_mid.clearRect(0, 0, can_mid.width, can_mid.height);
     can_revise.getContext("2d").clearRect(0, 0, can_revise.width, can_revise.height);
     can_revise.style.display = "none";
@@ -201,7 +201,8 @@ function writedown() {
     m_scale[1] = 1;
     revise_button.onclick = revise_start
     revise_button.innerHTML = "revise";
-    restore[restore.length] = ctx.getImageData(0, 0, w, h);
+    restore[restore.length] = ctx_active.getImageData(0, 0, w, h);
+    restore_active[restore_active.length] = ctx_active.id;
     document.getElementById('revise_hide').style.display='block';
     updateCanvas();
 }

@@ -6,11 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <style>
-        ul {
-            height: 500px
-        }
-    </style>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='index.css' )}}">
@@ -25,7 +20,7 @@
                     <h4>Choose color</h4>
                     <div class="fw-bold">Color</div>
                     <div>
-                        <input type="color" id="favcolor" value="#ff0000">
+                        <input type="color" id="favcolor" value="#ff0000" style="width: 100%;">
                     </div>
                     <div>
                         <div class="p-1 mb-1 rounded-3 text-white" style="background:green;" id="green"
@@ -68,37 +63,92 @@
                         <label for="customRange1" class="form-label">Line width</label>
                         <input type="range" class="form-range" id="width_range">
                     </div>
-                    <!-- <div class="fw-bold">Eraser</div>
-                        <div class="col">
-                            <div class="p-1 mb-1 rounded-3 text-black" style="background:white;border:2px solid"
-                                id="erase" onclick="color(this)">Eraser</div>
-                        </div> -->
                 </div>
             </div>
-            <div class="col rounded-3 align-middle" style="background:rgb(255, 249, 237); position:relative;z-index: 100;">
+            <div class="col rounded-3 align-middle"
+                style="background:rgb(255, 249, 237); position:relative;z-index: 100;">
                 <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
                 <h4>Tool</h4>
                 <div id="revise_hide">
-                    <input type="checkbox" class="btn-check" id="bye_button" autocomplete="off" onclick="bye()">
-                    <label class="btn btn-outline-warning" for="bye_button">Leave</label><br>
-                    <button type="button" class="btn btn-outline-primary" id="save_image"
-                        onclick="saveimage()">save</button><br>
-                    <label for="load_image" class="btn btn-outline-success">load</label><br>
+                    <button type="button" class="btn btn-outline-primary" id="save_image" onclick="saveimage()"
+                        style="width: 100%;">save</button><br>
+                    <label for="load_image" class="btn btn-outline-success" style="width: 100%;">load</label><br>
                     <input id="load_image" style="display: none;" type="file" />
-                    <button type="button" class="btn btn-outline-danger" id="clr"
-                        onclick="erase_all()">clear</button><br>
+                    <button type="button" class="btn btn-outline-danger" id="clr" onclick="erase_all()"
+                        style="width: 100%;">clear</button><br>
                     <input type="checkbox" class="btn-check" id="mirror_pivot" autocomplete="off" onclick="mirror()">
-                    <label class="btn btn-outline-info" for="mirror_pivot">mirror</label><br>
+                    <label class="btn btn-outline-info" for="mirror_pivot" style="width: 100%;">mirror</label><br>
                 </div>
-                <button class="btn btn-outline-primary" id="revise_button" onclick="revise_start()">revise</button>
+                <button class="btn btn-outline-primary" id="revise_button" onclick="revise_start()"
+                    style="width: 100%;">revise</button>
             </div>
-            <div class="col rounded-3 align-middle" style="background:rgb(255, 249, 237); position:relative;z-index: 100;">
+            <div class="col rounded-3 align-middle"
+                style="background:rgb(240, 255, 237); position:relative;z-index: 100;">
                 <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
                 <h4>Layer</h4>
-                <div id="revise_hide">
-                    <img><br>
+                <div class="btn-group" style="width: 100%;">
+                    <button type="button" class="btn btn-outline-secondary" onclick="add_minelayer()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-plus-square" viewBox="0 0 16 16">
+                            <path
+                                d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z">
+                            </path>
+                            <path
+                                d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4">
+                            </path>
+                        </svg>
+                        <span class="visually-hidden">Button</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"  onclick="delete_minelayer()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-dash-square" viewBox="0 0 16 16">
+                            <path
+                                d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                            <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8" />
+                        </svg>
+                        <span class="visually-hidden">Button</span>
+                    </button>
                 </div>
-                <button class="btn btn-outline-primary" id="revise_button" onclick="revise_start()">revise</button>
+                <div class="btn-group" style="width: 100%;">
+                    <button type="button" class="btn btn-outline-secondary" onclick="add_minelayer()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-caret-up-square" viewBox="0 0 16 16">
+                            <path
+                                d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                            <path
+                                d="M3.544 10.705A.5.5 0 0 0 4 11h8a.5.5 0 0 0 .374-.832l-4-4.5a.5.5 0 0 0-.748 0l-4 4.5a.5.5 0 0 0-.082.537" />
+                        </svg>
+                        <span class="visually-hidden">Button</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-caret-down-square" viewBox="0 0 16 16">
+                            <path d="M3.626 6.832A.5.5 0 0 1 4 6h8a.5.5 0 0 1 .374.832l-4 4.5a.5.5 0 0 1-.748 0z" />
+                            <path
+                                d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1z" />
+                        </svg>
+                        <span class="visually-hidden">Button</span>
+                    </button>
+                </div>
+                <div style=" position:relative;z-index: 100;">
+                    <label for="customRange1" class="form-label">Opacity</label>
+                    <input type="range" class="form-range" id="opacity_range">
+                </div>
+                <ul id="layer_thumbnail" class="overflow-auto">
+                    <li id="thumbnail_10" style="background-color: rgb(95, 103, 255);"
+                        onclick="change_minelayer_active(this)"><button type="button" class="btn"
+                            style="background-color: white;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-eye" viewBox="0 0 16 16">
+                                <path
+                                    d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z" />
+                                <path
+                                    d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0" />
+                            </svg>
+                            <span class="visually-hidden">Button</span>
+                        </button><img class="mx-2" width="75" height="75"></li>
+                </ul>
+
             </div>
             <div class="col" style="background:rgb(232, 232, 232);position:relative;z-index: 100;">
                 <h4>Shortcut</h4>
@@ -112,7 +162,10 @@
         </div>
         <div class="item" id="painting-area">
             <canvas id="middle" style="position:absolute;border:0px solid; touch-action: none;z-index: 80;"></canvas>
-            <canvas id="can" style="position:absolute;border:0px solid; touch-action: none;z-index: 10;"></canvas>
+            <canvas id="can" style="position:absolute;border:0px solid; touch-action: none;z-index: 70;"></canvas>
+            <canvas id="minelayer10" class="minelayer"
+                style="position:absolute;border:0px solid; touch-action: none;z-index: 10;"></canvas>
+            <canvas id="projection" style="position:absolute;border:0px solid; touch-action: none;z-index: 2;"></canvas>
             <div id="bg"
                 style="position:absolute;width:2000px;height:2000px;border:0px solid;border-style: dashed;border-color: rgb(255, 255, 255);background-color: rgb(255, 255, 255); touch-action: none;z-index: 0;">
             </div>
@@ -123,10 +176,11 @@
             <div id="landing">
                 <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-4 col-form-label">Username</label>
-                    <div class="col-sm-10">
+                    <div class="col-sm-12">
                         <input type="email" class="form-control" id="userName" placeholder="Username">
+                        <button class="btn btn-outline-secondary " type="button" id="join-btn"
+                            style="width: 100%;">JOIN</button>
                     </div>
-                    <button class="btn btn-outline-secondary" type="button" id="join-btn">JOIN</button>
                 </div>
                 <!-- <div class="form-group row">
                     <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
@@ -142,6 +196,8 @@
                     <button class="btn btn-outline-secondary" type="button" id="button-addon2"
                         onclick="sendMessage()">Send</button>
                 </div>
+                <input type="checkbox" class="btn-check" id="bye_button" autocomplete="off" onclick="bye()">
+                <label class="btn btn-outline-warning" style="width: 100%;" for="bye_button">Leave</label><br>
             </div>
             <div class="rounded-3 border border-dark p-3 mt-5" id="members" style="display:none">
                 <ul id="members-list"></ul>
@@ -207,11 +263,12 @@
                     canvaseParentNode.insertBefore(newcanvas, canvas)
                 }
             }
+            socket.emit('update_old_content');
         })
         socket.on("leaveRemoveCanvas", function (data) {
             leave_sid = data["LeaveSid"];
-            console.log("leave_sid :" + leave_sid);
-            console.log("self_sid :" + self_sid);
+            // console.log("leave_sid :" + leave_sid);
+            // console.log("self_sid :" + self_sid);
             if (leave_sid == self_sid) {
                 document.getElementById("bye_button").checked = false;
                 document.getElementById("bye_button").disabled = true;
@@ -220,21 +277,16 @@
                 document.getElementById("landing").style.display = "block";
                 socket.disconnect();
                 var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
-                console.log(othercanvasessetting.length);
                 while (othercanvasessetting.length > 0) {
                     othercanvasessetting[0].remove();
                 }
-                // for (let i = 0; i < othercanvasessetting.length; i++) {
-                //     othercanvasessetting[0].remove();
-                //     console.log(othercanvasessetting[0]);
-                // }
             }
             else {
                 document.getElementById(leave_sid).remove();
             }
         })
         socket.on("initUpdateImg", function (data) {
-            socket.emit("init_new_img", canvas.toDataURL());
+            socket.emit("init_new_img", can_proj.toDataURL());
         })
         socket.on("memberslistUpdate", function (data) {
             memberslist = data["memberslist"];
@@ -261,7 +313,6 @@
         })
         //Sketchboard part
         socket.on("updateImg", function (data) {
-            // console.log(data["updateimg"]);
             // var img=document.getElementById("update_img");
             // img.src=data["updateimg"];
             var img = new Image();
@@ -295,12 +346,16 @@
         var first_choose = true;
         draw_flag = true;//pen or eraser
         var canvas = document.getElementById('can');//main canvas
-        var ctx = canvas.getContext("2d");//main canvas content
+        var ctx = canvas.getContext("2d");//canvas content
         var can_mid = document.getElementById('middle');//For modify tool using a middle layer 
-        var ctx_mid = can_mid.getContext("2d");//middle layer content
+        var ctx_mid = can_mid.getContext("2d");
+        var can_proj = document.getElementById('projection');//For transfer to other member 
+        var ctx_proj = can_proj.getContext("2d");
+        var can_active = document.getElementById('minelayer10');//active layer (can be modified) 
+        var ctx_active = can_active.getContext("2d");
         var can_revise = document.createElement("canvas");//For modify tool using a final revise layer 
-        var revise_button = document.getElementById("revise_button");//final revise layer content
-        var background = document.getElementById("bg");//bg
+        var revise_button = document.getElementById("revise_button");
+        var background = document.getElementById("bg");//background
         var region = new Path2D();//For modify tool using a path 
         var scaleKey = "";//For pan and scale information
         var scale = 1.0;
@@ -331,6 +386,10 @@
             canvas.width = w;
             can_mid.height = h;
             can_mid.width = w;
+            can_proj.height = h;
+            can_proj.width = w;
+            can_active.height = h;
+            can_active.width = w;
             background.height = h;
             background.width = w;
             can_mid.style.display = "none";
@@ -342,10 +401,15 @@
             can_mid.style.left = left_key;
             background.style.top = top_key;
             background.style.left = left_key;
+            can_proj.style.top = top_key;
+            can_proj.style.left = left_key;
+            can_active.style.top = top_key;
+            can_active.style.left = left_key;
 
             //Tool variables
             space_pivot = false;
             restore = [canvas.getContext("2d").getImageData(0, 0, w, h)];//Undo record
+            restore_active = ["minelayer10"];//Undo record
             width_range = document.getElementById('width_range');
             custom_color = document.getElementById("favcolor");
 
@@ -446,7 +510,10 @@
         //Tool Undo
         function backLastStep() {
             if (restore.length > 1) {
-                ctx.putImageData(restore[restore.length - 2], 0, 0);
+                console.log(restore_active);
+                console.log(restore);
+                document.getElementById(restore_active[restore_active.length - 2]).getContext("2d").putImageData(restore[restore.length - 2], 0, 0);
+                restore_active.length--;
                 restore.length--;
                 updateCanvas();
             }
@@ -495,6 +562,11 @@
             for (let i = 0; i < othercanvasessetting.length; i++) {
                 othercanvasessetting[i].style.transform = scaleKey;
             }
+            can_proj.style.transform = scaleKey;
+            var minelayers = document.getElementsByClassName('minelayer');
+            for (let i = 0; i < minelayers.length; i++) {
+                minelayers[i].style.transform = scaleKey;
+            }
             // canvas_others.style.transformOrigin = scaleOriginKey;
         }
         //Tool Mirror
@@ -519,12 +591,17 @@
             for (let i = 0; i < othercanvasessetting.length; i++) {
                 othercanvasessetting[i].style.transform = scaleKey;
             }
+            can_proj.style.transform = scaleKey;
+            var minelayers = document.getElementsByClassName('minelayer');
+            for (let i = 0; i < minelayers.length; i++) {
+                minelayers[i].style.transform = scaleKey;
+            }
         }
         //Tool Save image by default name
         async function saveimage() {
             var link = document.createElement('a');
             link.download = 'sharingsketch.png';
-            link.href = document.getElementById('can').toDataURL('image/png')
+            link.href = document.getElementById('projection').toDataURL('image/png')
             link.click();
         }
         //Tool Load image by upload png
@@ -537,11 +614,11 @@
                 var img = new Image();
                 img.src = Res.target.result;
                 img.onload = function () {
-                    ctx.globalCompositeOperation = "source-over";
-                    ctx.clearRect(0, 0, w, h);
-                    ctx.drawImage(img, 0, 0);
-                    console.log(img);
-                    restore[restore.length] = ctx.getImageData(0, 0, w, h);
+                    ctx_active.globalCompositeOperation = "source-over";
+                    ctx_active.clearRect(0, 0, w, h);
+                    ctx_active.drawImage(img, 0, 0);
+                    restore[restore.length] = ctx_active.getImageData(0, 0, w, h);
+                    restore_active[restore_active.length] = can_active.id;
                     updateCanvas();
                 };
             }
@@ -556,7 +633,6 @@
                 pan_flag = true;
             }
             if (res == 'up' || res == 'out') {
-                // console.log("pan up");
                 if (pan_flag) {
                     x_offset = x_offset_origin + (x_offset / (scale * scale_xy[0]));
                     y_offset = y_offset_origin + (y_offset / (scale * scale_xy[1]));
@@ -567,6 +643,11 @@
                     var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
                     for (let i = 0; i < othercanvasessetting.length; i++) {
                         othercanvasessetting[i].style.transform = scaleKey;
+                    }
+                    can_proj.style.transform = scaleKey;
+                    var minelayers = document.getElementsByClassName('minelayer');
+                    for (let i = 0; i < minelayers.length; i++) {
+                        minelayers[i].style.transform = scaleKey;
                     }
                     pan_flag = false;
                 }
@@ -582,6 +663,11 @@
                     var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
                     for (let i = 0; i < othercanvasessetting.length; i++) {
                         othercanvasessetting[i].style.transform = scaleKey;
+                    }
+                    can_proj.style.transform = scaleKey;
+                    var minelayers = document.getElementsByClassName('minelayer');
+                    for (let i = 0; i < minelayers.length; i++) {
+                        minelayers[i].style.transform = scaleKey;
                     }
                 }
             }
@@ -636,17 +722,21 @@
                 flag = true;
                 dot_flag = true;
                 if (dot_flag) {
-                    ctx.beginPath();
-                    ctx.fillStyle = x;
-                    ctx.fillRect(currX * scale, currY * scale, 2 * e.pressure, 2 * e.pressure);
-                    ctx.closePath();
+                    ctx_active.beginPath();
+                    ctx_active.fillStyle = x;
+                    ctx_active.fillRect(currX * scale, currY * scale, 2 * e.pressure, 2 * e.pressure);
+                    ctx_active.closePath();
                     dot_flag = false;
                 }
             }
             if (res == 'up' || res == "out") {
                 if (flag) {
-                    if (restore.length >= restore_max) { restore.shift(); }
-                    restore[restore.length] = ctx.getImageData(0, 0, w, h);
+                    if (restore.length >= restore_max) {
+                        restore.shift();
+                        restore_active.shift();
+                    }
+                    restore[restore.length] = ctx_active.getImageData(0, 0, w, h);
+                    restore_active[restore_active.length] = can_active.id;
                     updateCanvas();
                 }
                 flag = false;
@@ -664,38 +754,52 @@
         //Sketch sub draw function
         function draw(pressure, draw_flag) {
             if (draw_flag) {
-                ctx.globalCompositeOperation = "source-over";
-                ctx.strokeStyle = x;
-                ctx.lineCap = "round";
-                ctx.lineWidth = line_widths[0] * pressure;
+                ctx_active.globalCompositeOperation = "source-over";
+                ctx_active.strokeStyle = x;
+                ctx_active.lineCap = "round";
+                ctx_active.lineWidth = line_widths[0] * pressure;
             }
             else {
                 // ctx.strokeStyle = rgba(0,0,0,0.0);
-                ctx.globalCompositeOperation = "destination-out";
-                ctx.lineWidth = line_widths[1];
+                ctx_active.globalCompositeOperation = "destination-out";
+                ctx_active.lineWidth = line_widths[1];
             }
-            ctx.beginPath();
-            ctx.moveTo((prevX - scale_orgin[0]) / (scale * scale_xy[0]) + scale_orgin[0] - x_offset, (prevY - scale_orgin[1]) / (scale * scale_xy[1]) + scale_orgin[1] - y_offset);
-            ctx.lineTo((currX - scale_orgin[0]) / (scale * scale_xy[0]) + scale_orgin[0] - x_offset, (currY - scale_orgin[1]) / (scale * scale_xy[1]) + scale_orgin[1] - y_offset);
+            ctx_active.beginPath();
+            ctx_active.moveTo((prevX - scale_orgin[0]) / (scale * scale_xy[0]) + scale_orgin[0] - x_offset, (prevY - scale_orgin[1]) / (scale * scale_xy[1]) + scale_orgin[1] - y_offset);
+            ctx_active.lineTo((currX - scale_orgin[0]) / (scale * scale_xy[0]) + scale_orgin[0] - x_offset, (currY - scale_orgin[1]) / (scale * scale_xy[1]) + scale_orgin[1] - y_offset);
             // ctx.moveTo((prevX) / (scale * scale_xy[0]) - x_offset, (prevY) / (scale * scale_xy[1]) - y_offset);
             // ctx.lineTo((currX) / (scale * scale_xy[0]) - x_offset, (currY) / (scale * scale_xy[1]) - y_offset);
-            ctx.stroke();
-            ctx.closePath();
+            ctx_active.stroke();
+            ctx_active.closePath();
         }
 
         function erase_all() {
             var m = confirm("Want to clear");
             if (m) {
-                ctx.clearRect(0, 0, w, h);
+                ctx_active.clearRect(0, 0, w, h);
                 document.getElementById("canvasimg").style.display = "none";
+                updateCanvas();
             }
         }
         //Updatecanvas
         function updateCanvas() {
-            socket.emit("new_img", canvas.toDataURL());
+            ctx_proj.clearRect(0, 0, w, h);
+            var thumbnail_img = document.getElementById("thumbnail_" + can_active.id.slice(9)).childNodes[1];
+            var minelayers = document.getElementsByClassName('minelayer');
+            if (minelayers.length == 0)
+                can_proj = can_active;
+            else {
+                for (let i = 0; i < minelayers.length; i++) {
+                    can_proj.getContext("2d").drawImage(minelayers[minelayers.length - 1 - i], 0, 0);
+                }
+            }
+            console.log(thumbnail_img);
+            thumbnail_img.src = can_active.toDataURL();
+            socket.emit("new_img", can_proj.toDataURL());
         }
     </script>
-    <script src={{url_for('static',filename='mod_function.js' )}}></script>
+    <script src="{{url_for('static',filename='mod_function.js' )}}"></script>
+    <script src="{{url_for('static',filename='layer_function.js' )}}"></script>
 </body>
 
 </html>
