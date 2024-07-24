@@ -99,7 +99,7 @@
                         </svg>
                         <span class="visually-hidden">Button</span>
                     </button>
-                    <button type="button" class="btn btn-outline-secondary"  onclick="delete_minelayer()">
+                    <button type="button" class="btn btn-outline-secondary" onclick="delete_minelayer()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-dash-square" viewBox="0 0 16 16">
                             <path
@@ -110,7 +110,7 @@
                     </button>
                 </div>
                 <div class="btn-group" style="width: 100%;">
-                    <button type="button" class="btn btn-outline-secondary" onclick="add_minelayer()">
+                    <button type="button" class="btn btn-outline-secondary" onclick="change_minelayer_order(1)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-caret-up-square" viewBox="0 0 16 16">
                             <path
@@ -120,7 +120,7 @@
                         </svg>
                         <span class="visually-hidden">Button</span>
                     </button>
-                    <button type="button" class="btn btn-outline-secondary">
+                    <button type="button" class="btn btn-outline-secondary" onclick="change_minelayer_order(-1)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-caret-down-square" viewBox="0 0 16 16">
                             <path d="M3.626 6.832A.5.5 0 0 1 4 6h8a.5.5 0 0 1 .374.832l-4 4.5a.5.5 0 0 1-.748 0z" />
@@ -135,7 +135,7 @@
                     <input type="range" class="form-range" id="opacity_range">
                 </div>
                 <ul id="layer_thumbnail" class="overflow-auto">
-                    <li id="thumbnail_10" style="background-color: rgb(95, 103, 255);"
+                    <li id="thumbnail_1" style="background-color: rgb(95, 103, 255);"
                         onclick="change_minelayer_active(this)"><button type="button" class="btn"
                             style="background-color: white;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -163,7 +163,7 @@
         <div class="item" id="painting-area">
             <canvas id="middle" style="position:absolute;border:0px solid; touch-action: none;z-index: 80;"></canvas>
             <canvas id="can" style="position:absolute;border:0px solid; touch-action: none;z-index: 70;"></canvas>
-            <canvas id="minelayer10" class="minelayer"
+            <canvas id="minelayer1" class="minelayer"
                 style="position:absolute;border:0px solid; touch-action: none;z-index: 10;"></canvas>
             <canvas id="projection" style="position:absolute;border:0px solid; touch-action: none;z-index: 2;"></canvas>
             <div id="bg"
@@ -286,7 +286,7 @@
             }
         })
         socket.on("initUpdateImg", function (data) {
-            socket.emit("init_new_img", can_proj.toDataURL());
+            socket.emit("init_new_img", can_proj.toDataURL('image/png'));
         })
         socket.on("memberslistUpdate", function (data) {
             memberslist = data["memberslist"];
@@ -351,7 +351,7 @@
         var ctx_mid = can_mid.getContext("2d");
         var can_proj = document.getElementById('projection');//For transfer to other member 
         var ctx_proj = can_proj.getContext("2d");
-        var can_active = document.getElementById('minelayer10');//active layer (can be modified) 
+        var can_active = document.getElementById('minelayer1');//active layer (can be modified) 
         var ctx_active = can_active.getContext("2d");
         var can_revise = document.createElement("canvas");//For modify tool using a final revise layer 
         var revise_button = document.getElementById("revise_button");
@@ -363,6 +363,7 @@
         var w = 2000;
         var h = 2000;
         var scale_orgin = [w / 2, h / 2];
+        var delete_canvas_pivots = [];
 
         //Drawtool variables
         line_widths = [2, 10, 0];//Set tools linewidth 1.pen；2.eraser 3.other(no _use)
@@ -409,7 +410,7 @@
             //Tool variables
             space_pivot = false;
             restore = [canvas.getContext("2d").getImageData(0, 0, w, h)];//Undo record
-            restore_active = ["minelayer10"];//Undo record
+            restore_active = ["minelayer1"];//Undo record
             width_range = document.getElementById('width_range');
             custom_color = document.getElementById("favcolor");
 
@@ -482,6 +483,14 @@
                 if (e.keyCode == 81) {
                     mirror();
                 }
+                //keycode-[
+                if (e.keyCode == 219) {
+                    line_width_change(-1);
+                }
+                //keycode-]
+                if (e.keyCode == 221) {
+                    line_width_change(1);
+                }
                 // console.log(space_pivot);
             }, false);
             //Tool PAN eventlistener
@@ -507,15 +516,38 @@
                 loadimage(event);
             });
         }
+        //Tool change linewidth
+        function line_width_change(pivot) {
+            width_range.value = parseInt(width_range.value) + pivot;
+            if (draw_flag) {
+                line_widths[0] = width_range.value;
+            }
+            else if (!draw_flag) {
+                line_widths[1] = width_range.value;
+            }
+        }
         //Tool Undo
         function backLastStep() {
             if (restore.length > 1) {
-                console.log(restore_active);
-                console.log(restore);
-                document.getElementById(restore_active[restore_active.length - 2]).getContext("2d").putImageData(restore[restore.length - 2], 0, 0);
-                restore_active.length--;
-                restore.length--;
-                updateCanvas();
+                if (document.getElementById(restore_active[restore_active.length - 2]) == null) {
+                    add_minelayer_existed(delete_canvas_pivots[delete_canvas_pivots.length - 1], restore_active[restore_active.length - 2])
+                    document.getElementById(restore_active[restore_active.length - 2]).getContext("2d").putImageData(restore[restore.length - 2], 0, 0);
+                    var thumbnail_img = document.getElementById("thumbnail_" + restore_active[restore_active.length - 2].slice(9)).childNodes[1];
+                    thumbnail_img.src = document.getElementById(restore_active[restore_active.length - 2]).toDataURL('image/png');
+                    restore_active.length--;
+                    delete_canvas_pivots.length--;
+                    restore.length--;
+                    updateCanvas();
+                } else {
+                    console.log(restore_active);
+                    console.log(restore);
+                    document.getElementById(restore_active[restore_active.length - 2]).getContext("2d").putImageData(restore[restore.length - 2], 0, 0);
+                    var thumbnail_img = document.getElementById("thumbnail_" + restore_active[restore_active.length - 2].slice(9)).childNodes[1];
+                    thumbnail_img.src = document.getElementById(restore_active[restore_active.length - 2]).toDataURL('image/png');
+                    restore_active.length--;
+                    restore.length--;
+                    updateCanvas();
+                }
             }
         }
         //Tool Zoom
@@ -529,32 +561,12 @@
                 if (scale < 0.3)
                     scale = 0.3;
             }
-
-
             if (!mirror_flag) {
-                // scale_orgin[0] = (e.clientX - canvas.offsetLeft - scale_orgin[0]) / (scale) + scale_orgin[0];
-                // scale_orgin[1] = (e.clientY - canvas.offsetTop - scale_orgin[1]) / (scale) + scale_orgin[1];
-                // scaleOriginKey = scale_orgin[0].toString() + "px " + scale_orgin[1].toString() + "px 0";
-                // console.log("scale_orgin[0]:"+scale_orgin[0].toString());
-                // console.log("orgin_client:"+(scale_orgin[0]+ canvas.offsetLeft).toString());
-                // console.log("e.clientX:"+e.clientX.toString());
-                // console.log("canvas.offsetLeft:"+(canvas.offsetLeft).toString());
                 scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
             }
             else if (mirror_flag) {
-                // var scale_orgin_tempt=scale_orgin[0];
-                // scale_orgin[0] = (e.clientX - canvas.offsetLeft - scale_orgin[0]) / (-scale) + scale_orgin[0];
-                // scale_orgin[1] = (e.clientY - canvas.offsetTop - scale_orgin[1]) / (scale) + scale_orgin[1];
-                // scaleOriginKey = scale_orgin[0].toString() + "px " + scale_orgin[1].toString() + "px 0";
-                // console.log("canvas.offsetLeft:"+(canvas.offsetLeft).toString());
-                // console.log("e.clientX:"+e.clientX.toString());
-                // x_offset = (e.clientX-canvas.offsetLeft - scale_orgin[0]);
-                // console.log("scale_orgin_tempt:"+scale_orgin_tempt.toString());
-                // console.log("scale_orgin[0]:"+scale_orgin[0].toString());
-                // console.log("x_offset:"+x_offset.toString());
                 scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
             }
-            // canvas.style.transformOrigin = scaleOriginKey;
             canvas.style.transform = scaleKey;
             can_mid.style.transform = scaleKey;
             background.style.transform = scaleKey;
@@ -567,7 +579,6 @@
             for (let i = 0; i < minelayers.length; i++) {
                 minelayers[i].style.transform = scaleKey;
             }
-            // canvas_others.style.transformOrigin = scaleOriginKey;
         }
         //Tool Mirror
         function mirror() {
@@ -606,11 +617,9 @@
         }
         //Tool Load image by upload png
         async function loadimage(event) {
-            // var htmlCheck = document.getElementsByName("Checkhtml");
             const reader = new FileReader();
             reader.readAsDataURL(event.target.files[0]);
             reader.onload = function (Res) {
-                // htmlCheck[0].innerHTML=Res.target.result;
                 var img = new Image();
                 img.src = Res.target.result;
                 img.onload = function () {
@@ -790,12 +799,12 @@
                 can_proj = can_active;
             else {
                 for (let i = 0; i < minelayers.length; i++) {
-                    can_proj.getContext("2d").drawImage(minelayers[minelayers.length - 1 - i], 0, 0);
+                    can_proj.getContext("2d").drawImage(minelayers[i], 0, 0);
                 }
             }
-            console.log(thumbnail_img);
-            thumbnail_img.src = can_active.toDataURL();
-            socket.emit("new_img", can_proj.toDataURL());
+            // console.log(thumbnail_img);
+            thumbnail_img.src = can_active.toDataURL('image/png');
+            socket.emit("new_img", can_proj.toDataURL('image/png'));
         }
     </script>
     <script src="{{url_for('static',filename='mod_function.js' )}}"></script>
