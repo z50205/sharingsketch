@@ -457,20 +457,25 @@
                 }
             });
 
-            // window.addEventListener('resize', function () {
-            //     top_key = (window.innerHeight / 2 - h / 2).toString() + 'px';
-            //     left_key = (window.innerWidth / 2 - w / 2).toString() + 'px';
-            //     canvas.style.top = top_key;
-            //     canvas.style.left = left_key;
-            //     can_mid.style.top = top_key;
-            //     can_mid.style.left = left_key;
-            //     background.style.top = top_key;
-            //     background.style.left = left_key;
-            //     can_proj.style.top = top_key;
-            //     can_proj.style.left = left_key;
-            //     can_active.style.top = top_key;
-            //     can_active.style.left = left_key;
-            // });
+            window.addEventListener('resize', function () {
+                top_key = (window.innerHeight / 2 - h / 2).toString() + 'px';
+                left_key = (window.innerWidth / 2 - w / 2).toString() + 'px';
+                canvas.style.top = top_key;
+                canvas.style.left = left_key;
+                can_mid.style.top = top_key;
+                can_mid.style.left = left_key;
+                background.style.top = top_key;
+                background.style.left = left_key;
+                can_proj.style.top = top_key;
+                can_proj.style.left = left_key;
+                can_active.style.top = top_key;
+                can_active.style.left = left_key;
+                var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+                for (let i = 0; i < othercanvasessetting.length; i++) {
+                        othercanvasessetting[i].style.top = top_key;
+                        othercanvasessetting[i].style.left = left_key;
+                    }
+            });
 
             //Canvas Sketch/Pan eventlistener(pointer)
             canvas.addEventListener("pointermove", function (e) {
