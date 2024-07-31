@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharing Sketch</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='index.css' )}}">
+</head>
+
+<body onload="init()" style="background-color: rgb(179, 179, 179);">
+    <div class="container-fluid">
+        <div class="item">
+            <div class="col rounded-3 border border-info"
+                style="background:rgb(237, 255, 254); position:relative;z-index: 100;">
+                <div class="row">
+                    <h4>Choose color</h4>
+                    <div class="fw-bold">Color</div>
+                    <div>
+                        <input type="color" id="favcolor" value="#ff0000" style="width: 100%;">
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:green;" id="green"
+                            onclick="color(this)">
+                            green</div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:blue;" id="blue"
+                            onclick="color(this)">
+                            blue
+                        </div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:red;" id="red"
+                            onclick="color(this)">
+                            red
+                        </div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-black" style="background:yellow;" id="yellow"
+                            onclick="color(this)">
+                            yellow</div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:orange;" id="orange"
+                            onclick="color(this)">
+                            orange</div>
+                    </div>
+                    <div>
+                        <div class="p-1 mb-1 rounded-3 text-white" style="background:black;" id="black"
+                            onclick="color(this)">
+                            black</div>
+                    </div>
+                    <div class="fw-bold">Eraser</div>
+                    <div>
+                        <input type="checkbox" class="btn-check" id="erase" autocomplete="off" onclick="color(this)">
+                        <label class="btn btn-outline-secondary" for="erase" style="width:100%">Eraser</label><br>
+                    </div>
+                    <div class="col" style=" position:relative;z-index: 100;">
+                        <label for="customRange1" class="form-label">Line width</label>
+                        <input type="range" class="form-range" id="width_range">
+                    </div>
+                </div>
+            </div>
+            <div class="col rounded-3 align-middle"
+                style="background:rgb(255, 249, 237); position:relative;z-index: 100;">
+                <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
+                <h4>Tool</h4>
+                <div id="revise_hide">
+                    <button type="button" class="btn btn-outline-primary" id="save_image" onclick="saveimage()"
+                        style="width: 100%;">save</button><br>
+                    <label for="load_image" class="btn btn-outline-success" style="width: 100%;">load</label><br>
+                    <input id="load_image" style="display: none;" type="file" />
+                    <button type="button" class="btn btn-outline-danger" id="clr" onclick="erase_all()"
+                        style="width: 100%;">clear</button><br>
+                    <input type="checkbox" class="btn-check" id="mirror_pivot" autocomplete="off" onclick="mirror()">
+                    <label class="btn btn-outline-info" for="mirror_pivot" style="width: 100%;">mirror</label><br>
+                </div>
+                <button class="btn btn-outline-primary" id="revise_button" onclick="revise_start()"
+                    style="width: 100%;">revise</button>
+            </div>
+            <div class="col rounded-3 align-middle"
+                style="background:rgb(240, 255, 237); position:relative;z-index: 100;">
+                <!-- <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;"> -->
+                <h4>Layer</h4>
+                <div class="btn-group" style="width: 100%;">
+                    <button type="button" class="btn btn-outline-secondary" onclick="add_minelayer()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-plus-square" viewBox="0 0 16 16">
+                            <path
+                                d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z">
+                            </path>
+                            <path
+                                d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4">
+                            </path>
+                        </svg>
+                        <span class="visually-hidden">Button</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="delete_minelayer()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-dash-square" viewBox="0 0 16 16">
+                            <path
+                                d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                            <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8" />
+                        </svg>
+                        <span class="visually-hidden">Button</span>
+                    </button>
+                </div>
+                <div class="btn-group" style="width: 100%;">
+                    <button type="button" class="btn btn-outline-secondary" onclick="change_minelayer_order(1)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-caret-up-square" viewBox="0 0 16 16">
+                            <path
+                                d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                            <path
+                                d="M3.544 10.705A.5.5 0 0 0 4 11h8a.5.5 0 0 0 .374-.832l-4-4.5a.5.5 0 0 0-.748 0l-4 4.5a.5.5 0 0 0-.082.537" />
+                        </svg>
+                        <span class="visually-hidden">Button</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="change_minelayer_order(-1)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-caret-down-square" viewBox="0 0 16 16">
+                            <path d="M3.626 6.832A.5.5 0 0 1 4 6h8a.5.5 0 0 1 .374.832l-4 4.5a.5.5 0 0 1-.748 0z" />
+                            <path
+                                d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1z" />
+                        </svg>
+                        <span class="visually-hidden">Button</span>
+                    </button>
+                </div>
+                <div style=" position:relative;z-index: 100;">
+                    <label for="customRange1" class="form-label">Opacity</label>
+                    <input type="range" class="form-range" id="opacity_range">
+                </div>
+                <ul id="layer_thumbnail" class="overflow-auto">
+                    <li id="thumbnail_1" style="background-color: rgb(95, 103, 255);"
+                        onclick="change_minelayer_active(this)"><button type="button" class="btn"
+                            style="background-color: white;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-eye" viewBox="0 0 16 16">
+                                <path
+                                    d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z" />
+                                <path
+                                    d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0" />
+                            </svg>
+                            <span class="visually-hidden">Button</span>
+                        </button><img class="mx-2" width="75" height="75"></li>
+                </ul>
+
+            </div>
+            <div class="col" style="background:rgb(232, 232, 232);position:relative;z-index: 100;">
+                <h4>Shortcut</h4>
+                <p>Mirror:Q<br>
+                    Pan:Space+Mouse(Pointer) Move<br>
+                    Undo:Ctrl+Z<br>
+                    Eraser:E<br>
+                    Zoom:Mouse Wheel<br>
+                    Pen:P<br></p>
+            </div>
+        </div>
+        <div class="item" id="painting-area">
+            <canvas id="middle" style="position:absolute;border:0px solid; touch-action: none;z-index: 80;"></canvas>
+            <canvas id="can" style="position:absolute;border:0px solid; touch-action: none;z-index: 70;"></canvas>
+            <canvas id="minelayer1" class="minelayer"
+                style="position:absolute;border:0px solid; touch-action: none;z-index: 10;"></canvas>
+            <canvas id="projection" style="position:absolute;border:0px solid; touch-action: none;z-index: 2;"></canvas>
+            <div id="bg"
+                style="position:absolute;width:2000px;height:2000px;border:0px solid;border-style: dashed;border-color: rgb(255, 255, 255);background-color: rgb(255, 255, 255); touch-action: none;z-index: 0;">
+            </div>
+        </div>
+        <div class="item" style=" position:relative;z-index: 100; background-color: rgb(255, 229, 211);">
+            <!-- col-sm-1 -->
+            <h1>Sharing Sketch</h1>
+            <div id="room-info"></div>
+            <div id="landing">
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <button class="btn btn-outline-secondary " type="button" id="join-btn"
+                            style="width: 100%;">Connect</button>
+                    </div>
+                </div>
+                <!-- <div class="form-group row">
+                    <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
+                    </div>
+                </div> -->
+            </div>
+            <div class="rounded-3 border border-dark p-3" id="chat" style="display:none">
+                <ul id="chat-messages"></ul>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="message" placeholder="Enter a Message">
+                    <button class="btn btn-outline-secondary" type="button" id="button-addon2"
+                        onclick="sendMessage()">Send</button>
+                </div>
+                <input type="checkbox" class="btn-check" id="bye_button" autocomplete="off" onclick="bye()">
+                <label class="btn btn-outline-warning" style="width: 100%;" for="bye_button">Disconnect</label><br>
+                <input type="checkbox" class="btn-check" id="leave_room_button" autocomplete="off"
+                    onclick="leave_room()">
+                <label class="btn btn-outline-danger" style="width: 100%;" for="leave_room_button">Leave
+                    Room</label><br>
+            </div>
+            <div class="rounded-3 border border-dark p-3 mt-5" id="members" style="display:none">
+                <ul id="members-list"></ul>
+            </div>
+        </div>
+    </div>
+    <!-- Socketio Code -->
+    <script>
+        //Chatroom part
+        const username = "{{ username }}";
+        const room = "{{ roomname }}";
+
+        const roomInfo = document.getElementById('room-info');
+        roomInfo.textContent = `Room: ${room} | User: ${username}`;
+
+        // const socket = io({ transports: ["websocket"] });
+        // const socket = io('https://beamviewer.bizara.link', { transports: ["websocket"], autoConnect: false });
+        const socket = io('http://52.195.89.113', { transports: ["websocket"], autoConnect: false });
+
+        document.getElementById("join-btn").addEventListener("click", function () {
+            if (!socket.connected) {
+                socket.connect();
+                console.log("Connecting...");
+            } else {
+                console.log("Already connected");
+            }
+        })
+        document.getElementById("message").addEventListener("keyup", function (event) {
+            if (event.key == "Enter") {
+                sendMessage();
+            }
+        })
+        // let isVisibilityChangeCompleted = false;
+        // window.addEventListener('visibilitychange', (event) => {
+        //     console.log(socket.connected);
+        //     console.log(document.visibilityState === 'visible'&&socket.connected);
+        //     if (document.visibilityState === 'visible'&&socket.connected) {
+        //         socket.emit("bye",false);
+        //         isVisibilityChangeCompleted==true;
+        //     } else if (document.visibilityState === 'hidden') {
+        //         socket.emit("bye",true);
+        //     }
+        // });
+        socket.on("connect", function () {
+            console.log("On Connect");
+            document.getElementById("chat").style.display = "block";
+            document.getElementById("members").style.display = "block";
+            document.getElementById("landing").style.display = "none";
+            socket.emit("user_join", { username, room });
+            document.getElementById("bye_button").checked = true;
+            document.getElementById("bye_button").disabled = false;
+            document.getElementById("leave_room_button").checked = true;
+            document.getElementById("leave_room_button").disabled = false;
+        })
+        socket.on("createNewCanvas", function (data) {
+            canvassids = data["canvassids"];
+            console.log("canvassids" + canvassids);
+            console.log("self_sid" + self_sid);
+            var allcanvases = document.getElementsByTagName('canvas');
+            var allcanvaseslength = allcanvases.length;
+            var canvaseParentNode = document.getElementById('painting-area');
+            for (i = 0; i < canvassids.length; i++) {
+                var newone_pivot = true;
+                for (ii = 0; ii < allcanvaseslength; ii++) {
+                    if (allcanvases[ii].id == canvassids[i] || self_sid == canvassids[i]) {
+                        newone_pivot = false;
+                    }
+                }
+                if (newone_pivot) {
+                    var newcanvas = document.createElement("canvas");
+                    newcanvas.style = "position:absolute;border:0px solid; touch-action: none;z-index: 1;"
+                    newcanvas.style.top = top_key;
+                    newcanvas.style.left = left_key;
+                    newcanvas.id = canvassids[i];
+                    newcanvas.height = h;
+                    newcanvas.width = w;
+                    newcanvas.className = "othermembercanvases";
+                    newcanvas.style.transform = scaleKey;
+                    canvaseParentNode.insertBefore(newcanvas, canvas)
+                }
+            }
+            socket.emit('update_old_content', room);
+        })
+        socket.on("leaveRemoveCanvas", function (data) {
+            leave_sid = data["LeaveSid"];
+            console.log("leave_sid :" + leave_sid);
+            console.log("self_sid :" + self_sid);
+            if (leave_sid == self_sid) {
+                var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+                while (othercanvasessetting.length > 0) {
+                    othercanvasessetting[0].remove();
+                }
+            }
+            else {
+                document.getElementById(leave_sid).remove();
+            }
+        })
+        socket.on("initUpdateImg", function (data) {
+            const can_proj_data = can_proj.toDataURL('image/png')
+            socket.emit("init_new_img", { can_proj_data, room });
+        })
+        socket.on("memberslistUpdate", function (data) {
+            memberslist = data["memberslist"];
+            console.log("roomname" + room + "memberslist" + memberslist);
+            let ul = document.getElementById("members-list");
+            ul.innerHTML = "";
+            for (i = 0; i < memberslist.length; i++) {
+                let li = document.createElement("li");
+                li.appendChild(document.createTextNode("member " + i + ":" + memberslist[i]));
+                ul.appendChild(li);
+            }
+        })
+        socket.on("join", function (data) {
+            self_sid = data["SelfSid"];
+            console.log(self_sid);
+            socket.emit('update_old_content', room);
+            updateCanvas();
+        })
+        socket.on("chat", function (data) {
+            let ul = document.getElementById("chat-messages");
+            let li = document.createElement("li");
+            li.appendChild(document.createTextNode(data["username"] + ":" + data["message"]));
+            ul.appendChild(li);
+            ul.scrollTop = ul.scrollHeight;
+        })
+        //Sketchboard part
+        socket.on("updateImg", function (data) {
+            // var img=document.getElementById("update_img");
+            // img.src=data["updateimg"];
+            var img = new Image();
+            img.src = data["updateimg"];
+            img.onload = function () {
+                ctx_others = document.getElementById(data["UpdateSid"]).getContext("2d");
+                ctx_others.clearRect(0, 0, w, h);
+                ctx_others.drawImage(img, 0, 0);
+                document.getElementById(data["UpdateSid"]).style.transform = scaleKey;
+            };
+            // canvas.getContext("2d").drawImage(img, 0, 0);
+        })
+        //Redirect
+        socket.on("redirect", function (data) {
+            socket.disconnect();
+            console.log("disconnect()");
+            window.location.href = data.url;
+        });
+        socket.on("disconnect", function (data) {
+            socket.disconnect();
+            document.getElementById("bye_button").checked = false;
+            document.getElementById("bye_button").disabled = true;
+            document.getElementById("chat").style.display = "none";
+            document.getElementById("members").style.display = "none";
+            document.getElementById("landing").style.display = "block";
+            console.log("disconnect()");
+        });
+
+        function sendMessage() {
+            let message = document.getElementById("message").value;
+            socket.emit("new_message", { message, room });
+            document.getElementById("message").value = "";
+        }
+        function bye() {
+            socket.emit("bye", room);
+        }
+        function leave_room() {
+            socket.emit("leave_room", room);
+        }
+    </script>
+    <!-- Client Render Code -->
+    <script type="text/javascript">
+        //Canvas variables
+        var canvas, ctx, flag, pan_flag = false,
+            prevX = 0,
+            currX = 0,
+            prevY = 0,
+            currY = 0,
+            dot_flag = false;
+        var first_choose = true;
+        draw_flag = true;//pen or eraser
+        var canvas = document.getElementById('can');//main canvas
+        var ctx = canvas.getContext("2d");//canvas content
+        var can_mid = document.getElementById('middle');//For modify tool using a middle layer 
+        var ctx_mid = can_mid.getContext("2d");
+        var can_proj = document.getElementById('projection');//For transfer to other member 
+        var ctx_proj = can_proj.getContext("2d");
+        var can_active = document.getElementById('minelayer1');//active layer (can be modified) 
+        var ctx_active = can_active.getContext("2d");
+        var can_revise = document.createElement("canvas");//For modify tool using a final revise layer 
+        var revise_button = document.getElementById("revise_button");
+        var background = document.getElementById("bg");//background
+        var region = new Path2D();//For modify tool using a path 
+        var scaleKey = "";//For pan and scale information
+        var scale = 1.0;
+        var scale_xy = [1, 1];
+        var w = 2000;
+        var h = 2000;
+        var scale_orgin = [w / 2, h / 2];
+        var delete_canvas_pivots = [];
+
+        //Drawtool variables
+        line_widths = [2, 10, 0];//Set tools linewidth 1.pen；2.eraser 3.other(no _use)
+        line_widths_max = [100, 200, 0];//Set tools linewidth Maximum 1.pen；2.eraser 3.other(no _use)
+        pan_flag = false;
+        mirror_flag = false;
+        restore_max = 20;
+        var x = "black"
+
+        //Init
+        function init() {
+            //Canvas variables
+            x_old_origin = 0;
+            y_old_origin = 0;
+            self_sid = "";
+            x_offset = 0;
+            y_offset = 0;
+            active_canvas_name = 'can';
+            fileUploader = document.getElementById("load_image");
+            canvas.height = h;
+            canvas.width = w;
+            can_mid.height = h;
+            can_mid.width = w;
+            can_proj.height = h;
+            can_proj.width = w;
+            can_active.height = h;
+            can_active.width = w;
+            background.height = h;
+            background.width = w;
+            can_mid.style.display = "none";
+            top_key = (window.innerHeight / 2 - h / 2).toString() + 'px';
+            left_key = (window.innerWidth / 2 - w / 2).toString() + 'px';
+            canvas.style.top = top_key;
+            canvas.style.left = left_key;
+            can_mid.style.top = top_key;
+            can_mid.style.left = left_key;
+            background.style.top = top_key;
+            background.style.left = left_key;
+            can_proj.style.top = top_key;
+            can_proj.style.left = left_key;
+            can_active.style.top = top_key;
+            can_active.style.left = left_key;
+
+            //Tool variables
+            space_pivot = false;
+            restore = [canvas.getContext("2d").getImageData(0, 0, w, h)];//Undo record
+            restore_active = ["minelayer1"];//Undo record
+            width_range = document.getElementById('width_range');
+            custom_color = document.getElementById("favcolor");
+
+
+            //Cancel defaultevent
+            window.addEventListener("wheel", e => e.preventDefault(), { passive: false })
+            window.addEventListener('keydown', function (e) {
+                if (e.keyCode == 32 && e.target == document.body) {
+                    e.preventDefault();
+                }
+            });
+
+            // window.addEventListener('resize', function () {
+            //     top_key = (window.innerHeight / 2 - h / 2).toString() + 'px';
+            //     left_key = (window.innerWidth / 2 - w / 2).toString() + 'px';
+            //     canvas.style.top = top_key;
+            //     canvas.style.left = left_key;
+            //     can_mid.style.top = top_key;
+            //     can_mid.style.left = left_key;
+            //     background.style.top = top_key;
+            //     background.style.left = left_key;
+            //     can_proj.style.top = top_key;
+            //     can_proj.style.left = left_key;
+            //     can_active.style.top = top_key;
+            //     can_active.style.left = left_key;
+            // });
+
+            //Canvas Sketch/Pan eventlistener(pointer)
+            canvas.addEventListener("pointermove", function (e) {
+                mouse_position = [e.clientX, e.clientY];
+                if (space_pivot)
+                    panCanvas('move', e)
+                else
+                    findxy('move', e, draw_flag)
+            }, false);
+            canvas.addEventListener("pointerdown", function (e) {
+                if (space_pivot)
+                    panCanvas('down', e)
+                else
+                    findxy('down', e, draw_flag)
+            }, false);
+            canvas.addEventListener("pointerup", function (e) {
+                if (space_pivot)
+                    panCanvas('up', e)
+                else
+                    findxy('up', e, draw_flag)
+            }, false);
+            canvas.addEventListener("pointerout", function (e) {
+                if (space_pivot)
+                    panCanvas('out', e)
+                else
+                    findxy('out', e, draw_flag)
+            }, false);
+
+            //Tool Change pointerwidth eventlistener
+            width_range.addEventListener("pointerup", function (e) {
+                if (draw_flag) {
+                    line_widths[0] = width_range.value;
+                } else
+                    line_widths[1] = width_range.value;
+            }, false);
+            //Tool Undo/PAN eventlistener
+            document.addEventListener("keydown", function (e) {
+                e.preventDefault;
+                if (e.ctrlKey && e.keyCode == 90)
+                    backLastStep();
+                //keycode-space
+                if (e.keyCode == 32) {
+                    e.preventDefault;
+                    space_pivot = true;
+                }
+                //keycode-E
+                if (e.keyCode == 69) {
+                    color(document.getElementById('erase'));
+                }
+                //keycode-M
+                if (e.keyCode == 77) {
+                    mirror();
+                }
+                //keycode-P
+                if (e.keyCode == 80) {
+                    color(document.getElementById(x));
+                }
+                //keycode-Q
+                if (e.keyCode == 81) {
+                    mirror();
+                }
+                //keycode-[
+                if (e.keyCode == 219) {
+                    line_width_change(-1);
+                }
+                //keycode-]
+                if (e.keyCode == 221) {
+                    line_width_change(1);
+                }
+                // console.log(space_pivot);
+            }, false);
+            //Tool PAN eventlistener
+            document.addEventListener("keyup", function (e) {
+                if (e.keyCode == 32) {
+                    e.preventDefault;
+                    space_pivot = false;
+                    flag = false;
+                }
+                // console.log(space_pivot);
+            }, false);
+            //Tool Zoom-in eventlistener
+            canvas.addEventListener("wheel", function (e) {
+                zoom_in(e)
+            }, false);
+            //Tool custom color eventlistener
+            custom_color.addEventListener("input", function (e) {
+                x = custom_color.value.toString();
+            }, false);
+            updateToolInfo();
+            //Tool load eventlistener
+            fileUploader.addEventListener('change', event => {
+                loadimage(event);
+            });
+        }
+        //Tool change linewidth
+        function line_width_change(pivot) {
+            width_range.value = parseInt(width_range.value) + pivot;
+            if (draw_flag) {
+                line_widths[0] = width_range.value;
+            }
+            else if (!draw_flag) {
+                line_widths[1] = width_range.value;
+            }
+        }
+        //Tool Undo
+        function backLastStep() {
+            if (restore.length > 1) {
+                if (document.getElementById(restore_active[restore_active.length - 2]) == null) {
+                    add_minelayer_existed(delete_canvas_pivots[delete_canvas_pivots.length - 1], restore_active[restore_active.length - 2])
+                    document.getElementById(restore_active[restore_active.length - 2]).getContext("2d").putImageData(restore[restore.length - 2], 0, 0);
+                    var thumbnail_img = document.getElementById("thumbnail_" + restore_active[restore_active.length - 2].slice(9)).childNodes[1];
+                    thumbnail_img.src = document.getElementById(restore_active[restore_active.length - 2]).toDataURL('image/png');
+                    restore_active.length--;
+                    delete_canvas_pivots.length--;
+                    restore.length--;
+                    updateCanvas();
+                } else {
+                    console.log(restore_active);
+                    console.log(restore);
+                    document.getElementById(restore_active[restore_active.length - 2]).getContext("2d").putImageData(restore[restore.length - 2], 0, 0);
+                    var thumbnail_img = document.getElementById("thumbnail_" + restore_active[restore_active.length - 2].slice(9)).childNodes[1];
+                    thumbnail_img.src = document.getElementById(restore_active[restore_active.length - 2]).toDataURL('image/png');
+                    restore_active.length--;
+                    restore.length--;
+                    updateCanvas();
+                }
+            }
+        }
+        //Tool Zoom
+        function zoom_in(e) {
+            // ctx.scale(0.5, 0.5);
+            // canvas.height=2*h;
+            if (0.1 <= scale <= 3) {
+                scale += e.deltaY * -0.001;
+                if (scale > 3)
+                    scale = 3;
+                if (scale < 0.3)
+                    scale = 0.3;
+            }
+            if (!mirror_flag) {
+                scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+            }
+            else if (mirror_flag) {
+                scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+            }
+            canvas.style.transform = scaleKey;
+            can_mid.style.transform = scaleKey;
+            background.style.transform = scaleKey;
+            var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+            for (let i = 0; i < othercanvasessetting.length; i++) {
+                othercanvasessetting[i].style.transform = scaleKey;
+            }
+            can_proj.style.transform = scaleKey;
+            var minelayers = document.getElementsByClassName('minelayer');
+            for (let i = 0; i < minelayers.length; i++) {
+                minelayers[i].style.transform = scaleKey;
+            }
+        }
+        //Tool Mirror
+        function mirror() {
+            if (!mirror_flag) {
+                scale_xy = [-1, 1];
+                scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+                mirror_flag = true;
+                document.getElementById("mirror_pivot").checked = true;
+            }
+            else if (mirror_flag) {
+                scale_x = scale;
+                scale_xy = [1, 1];
+                scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+                mirror_flag = false;
+                document.getElementById("mirror_pivot").checked = false;
+            }
+            canvas.style.transform = scaleKey;
+            can_mid.style.transform = scaleKey;
+            background.style.transform = scaleKey;
+            var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+            for (let i = 0; i < othercanvasessetting.length; i++) {
+                othercanvasessetting[i].style.transform = scaleKey;
+            }
+            can_proj.style.transform = scaleKey;
+            var minelayers = document.getElementsByClassName('minelayer');
+            for (let i = 0; i < minelayers.length; i++) {
+                minelayers[i].style.transform = scaleKey;
+            }
+        }
+        //Tool Save image by default name
+        async function saveimage() {
+            var link = document.createElement('a');
+            link.download = 'sharingsketch.png';
+            link.href = document.getElementById('projection').toDataURL('image/png')
+            link.click();
+        }
+        //Tool Load image by upload png
+        async function loadimage(event) {
+            const reader = new FileReader();
+            reader.readAsDataURL(event.target.files[0]);
+            reader.onload = function (Res) {
+                var img = new Image();
+                img.src = Res.target.result;
+                img.onload = function () {
+                    ctx_active.globalCompositeOperation = "source-over";
+                    ctx_active.clearRect(0, 0, w, h);
+                    ctx_active.drawImage(img, 0, 0);
+                    restore[restore.length] = ctx_active.getImageData(0, 0, w, h);
+                    restore_active[restore_active.length] = can_active.id;
+                    updateCanvas();
+                };
+            }
+        }
+        //Tool Pan
+        function panCanvas(res, e) {
+            if (res == 'down') {
+                x_old_origin = e.clientX;
+                y_old_origin = e.clientY;
+                x_offset_origin = x_offset;
+                y_offset_origin = y_offset;
+                pan_flag = true;
+            }
+            if (res == 'up' || res == 'out') {
+                if (pan_flag) {
+                    x_offset = x_offset_origin + (x_offset / (scale * scale_xy[0]));
+                    y_offset = y_offset_origin + (y_offset / (scale * scale_xy[1]));
+                    scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset).toString() + "px," + (y_offset).toString() + "px)";
+                    canvas.style.transform = scaleKey;
+                    can_mid.style.transform = scaleKey;
+                    background.style.transform = scaleKey;
+                    var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+                    for (let i = 0; i < othercanvasessetting.length; i++) {
+                        othercanvasessetting[i].style.transform = scaleKey;
+                    }
+                    can_proj.style.transform = scaleKey;
+                    var minelayers = document.getElementsByClassName('minelayer');
+                    for (let i = 0; i < minelayers.length; i++) {
+                        minelayers[i].style.transform = scaleKey;
+                    }
+                    pan_flag = false;
+                }
+            }
+            if (res == 'move') {
+                if (pan_flag) {
+                    x_offset = e.clientX - x_old_origin;
+                    y_offset = e.clientY - y_old_origin;
+                    scaleKey = "scale(" + (scale * scale_xy[0]).toString() + "," + (scale * scale_xy[1]).toString() + ") " + "translate(" + (x_offset_origin + (x_offset / (scale * scale_xy[0]))).toString() + "px," + (y_offset_origin + (y_offset / (scale * scale_xy[1]))).toString() + "px)";
+                    canvas.style.transform = scaleKey;
+                    can_mid.style.transform = scaleKey;
+                    background.style.transform = scaleKey;
+                    var othercanvasessetting = document.getElementsByClassName('othermembercanvases');
+                    for (let i = 0; i < othercanvasessetting.length; i++) {
+                        othercanvasessetting[i].style.transform = scaleKey;
+                    }
+                    can_proj.style.transform = scaleKey;
+                    var minelayers = document.getElementsByClassName('minelayer');
+                    for (let i = 0; i < minelayers.length; i++) {
+                        minelayers[i].style.transform = scaleKey;
+                    }
+                }
+            }
+        }
+        //Tool Color Change
+        function color(obj) {
+            draw_flag = true;
+            document.getElementById("erase").checked = false;
+            switch (obj.id) {
+                case "green":
+                    x = "green";
+                    break;
+                case "blue":
+                    x = "blue";
+                    break;
+                case "red":
+                    x = "red";
+                    break;
+                case "yellow":
+                    x = "yellow";
+                    break;
+                case "orange":
+                    x = "orange";
+                    break;
+                case "black":
+                    x = "black";
+                    break;
+                case "black":
+                    x = "black";
+                    break;
+                case "erase":
+                    draw_flag = false;
+                    document.getElementById("erase").checked = true;
+                    break;
+            }
+            updateToolInfo();
+        }
+        //Tool Change pointwidth(Pen/Eraser)
+        function updateToolInfo() {
+            if (draw_flag)
+                width_range.value = line_widths[0];
+            else if (!draw_flag)
+                width_range.value = line_widths[1];
+        }
+        //Sketch
+        function findxy(res, e, draw_flag) {
+            if (res == 'down') {
+                prevX = currX;
+                prevY = currY;
+                currX = e.clientX - canvas.offsetLeft;
+                currY = e.clientY - canvas.offsetTop;
+                flag = true;
+                dot_flag = true;
+                if (dot_flag) {
+                    ctx_active.beginPath();
+                    ctx_active.fillStyle = x;
+                    ctx_active.fillRect(currX * scale, currY * scale, 2 * e.pressure, 2 * e.pressure);
+                    ctx_active.closePath();
+                    dot_flag = false;
+                }
+            }
+            if (res == 'up' || res == "out") {
+                if (flag) {
+                    if (restore.length >= restore_max) {
+                        restore.shift();
+                        restore_active.shift();
+                    }
+                    restore[restore.length] = ctx_active.getImageData(0, 0, w, h);
+                    restore_active[restore_active.length] = can_active.id;
+                    updateCanvas();
+                }
+                flag = false;
+            }
+            if (res == 'move') {
+                if (flag) {
+                    prevX = currX;
+                    prevY = currY;
+                    currX = e.clientX - canvas.offsetLeft;
+                    currY = e.clientY - canvas.offsetTop;
+                    draw(e.pressure, draw_flag);
+                }
+            }
+        }
+        //Sketch sub draw function
+        function draw(pressure, draw_flag) {
+            if (draw_flag) {
+                ctx_active.globalCompositeOperation = "source-over";
+                ctx_active.strokeStyle = x;
+                ctx_active.lineCap = "round";
+                ctx_active.lineWidth = line_widths[0] * pressure;
+            }
+            else {
+                // ctx.strokeStyle = rgba(0,0,0,0.0);
+                ctx_active.globalCompositeOperation = "destination-out";
+                ctx_active.lineWidth = line_widths[1];
+            }
+            ctx_active.beginPath();
+            ctx_active.moveTo((prevX - scale_orgin[0]) / (scale * scale_xy[0]) + scale_orgin[0] - x_offset, (prevY - scale_orgin[1]) / (scale * scale_xy[1]) + scale_orgin[1] - y_offset);
+            ctx_active.lineTo((currX - scale_orgin[0]) / (scale * scale_xy[0]) + scale_orgin[0] - x_offset, (currY - scale_orgin[1]) / (scale * scale_xy[1]) + scale_orgin[1] - y_offset);
+            // ctx.moveTo((prevX) / (scale * scale_xy[0]) - x_offset, (prevY) / (scale * scale_xy[1]) - y_offset);
+            // ctx.lineTo((currX) / (scale * scale_xy[0]) - x_offset, (currY) / (scale * scale_xy[1]) - y_offset);
+            ctx_active.stroke();
+            ctx_active.closePath();
+        }
+
+        function erase_all() {
+            var m = confirm("Want to clear");
+            if (m) {
+                ctx_active.clearRect(0, 0, w, h);
+                document.getElementById("canvasimg").style.display = "none";
+                updateCanvas();
+            }
+        }
+        //Updatecanvas
+        function updateCanvas() {
+            ctx_proj.clearRect(0, 0, w, h);
+            var thumbnail_img = document.getElementById("thumbnail_" + can_active.id.slice(9)).childNodes[1];
+            var minelayers = document.getElementsByClassName('minelayer');
+            if (minelayers.length == 0)
+                can_proj = can_active;
+            else {
+                for (let i = 0; i < minelayers.length; i++) {
+                    can_proj.getContext("2d").drawImage(minelayers[i], 0, 0);
+                }
+            }
+            // console.log(thumbnail_img);
+            thumbnail_img.src = can_active.toDataURL('image/png');
+            const can_proj_data = can_proj.toDataURL('image/png')
+            socket.emit("new_img", { can_proj_data, room });
+        }
+    </script>
+    <script src="{{url_for('static',filename='mod_function.js' )}}"></script>
+    <script src="{{url_for('static',filename='layer_function.js' )}}"></script>
+</body>
+
+</html>
