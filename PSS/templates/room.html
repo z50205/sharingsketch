@@ -210,16 +210,15 @@
     <!-- Socketio Code -->
     <script>
         //Chatroom part
+        // const socket = io('https://beamviewer.bizara.link', { transports: ["websocket"], autoConnect: false });
+        // const socket = io('http://52.195.89.113', { transports: ["websocket"], autoConnect: false });
         const username = "{{ username }}";
         const room = "{{ roomname }}";
-
+        
         const roomInfo = document.getElementById('room-info');
         roomInfo.textContent = `Room: ${room} | User: ${username}`;
-
+        const socket = io('http://13.112.29.121', { transports: ["websocket"], autoConnect: false });
         // const socket = io({ transports: ["websocket"] });
-        // const socket = io('https://beamviewer.bizara.link', { transports: ["websocket"], autoConnect: false });
-        const socket = io('http://52.195.89.113', { transports: ["websocket"], autoConnect: false });
-
         document.getElementById("join-btn").addEventListener("click", function () {
             if (!socket.connected) {
                 socket.connect();
@@ -474,7 +473,7 @@
                 for (let i = 0; i < othercanvasessetting.length; i++) {
                         othercanvasessetting[i].style.top = top_key;
                         othercanvasessetting[i].style.left = left_key;
-                    }
+                }
             });
 
             //Canvas Sketch/Pan eventlistener(pointer)

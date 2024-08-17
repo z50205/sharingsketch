@@ -7,25 +7,34 @@ from PSS.models.user import User
 def index():
     # if current_user.is_authenticated:
     #     return redirect(url_for('index'))
-    form=Loginform(meta={'csrf': False})
+    form=Loginform()
+    print("index")
     if form.validate_on_submit():
+        print("submit")
         u=User.query.filter_by(username=form.username.data).first()
+        print("query")
         if u is None or not u.check_password(form.password.data):
             flash("Invalid username or password")
+            print("invalid account")
             return redirect(url_for('index'))
         session.clear()
         login_user(u,remember=form.remember_me.data)
         session['roomname']=form.roomname.data
         session['username']=form.username.data
+        print("account/redirect")
         return redirect(url_for('room'))
+    print(form.errors)
     return render_template('index.html',form=form)
 
 def register():
     # if current_user.is_authenticated:
     #     return redirect(url_for('index'))
-    form=Registerform(meta={'csrf': False})
+    print("register")
+    form=Registerform()
     if form.validate_on_submit():
+        print("submit")
         existing_user = User.query.filter_by(username=form.username.data).first()
+        print("query")
         if existing_user:
             flash("Username already taken. Please choose a different one.")
             return redirect(url_for('register'))

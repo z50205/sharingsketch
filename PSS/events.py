@@ -7,7 +7,7 @@ from PSS.extensions import Loginform
 
 users={}
 typing_timers={}
-done_typing_interval =60*0.5
+done_typing_interval =60*0.2
 typing_timers_lock = Lock()
 
 
