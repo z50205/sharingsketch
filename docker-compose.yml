@@ -1,8 +1,21 @@
 version: "3"
 
 services:
-  web:
+  nginx:
+    container_name: nginx-https
+    image: nginx:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - sketch
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d/:rw
+  sketch:
     ports:
       - "8002:8002"
     container_name: sharing_sketch_20240711
-    image: sharing_sketch
+    environment:
+      - PYTHONUNBUFFERED=1
+    image: pss_websocket
