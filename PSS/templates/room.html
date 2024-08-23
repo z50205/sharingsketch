@@ -134,7 +134,7 @@
                     <label for="customRange1" class="form-label">Opacity</label>
                     <input type="range" class="form-range" id="opacity_range">
                 </div>
-                <ul id="layer_thumbnail" class="overflow-auto">
+                <ul id="layer_thumbnail">
                     <li id="thumbnail_1" style="background-color: rgb(95, 103, 255);"
                         onclick="change_minelayer_active(this)"><button type="button" class="btn"
                             style="background-color: white;">
@@ -166,7 +166,7 @@
             <canvas id="minelayer1" class="minelayer"
                 style="position:absolute;border:0px solid; touch-action: none;z-index: 10;"></canvas>
             <canvas id="projection" style="position:absolute;border:0px solid; touch-action: none;z-index: 2;"></canvas>
-            <div id="bg"
+            <div id="bg" class="overflow-auto"
                 style="position:absolute;width:2000px;height:2000px;border:0px solid;border-style: dashed;border-color: rgb(255, 255, 255);background-color: rgb(255, 255, 255); touch-action: none;z-index: 0;">
             </div>
         </div>
@@ -189,7 +189,7 @@
                 </div> -->
             </div>
             <div class="rounded-3 border border-dark p-3" id="chat" style="display:none">
-                <ul id="chat-messages"></ul>
+                <ul id="chat-messages" class="overflow-auto"></ul>
                 <div class="input-group">
                     <input type="text" class="form-control" id="message" placeholder="Enter a Message">
                     <button class="btn btn-outline-secondary" type="button" id="button-addon2"
@@ -212,6 +212,7 @@
         //Chatroom part
         const username = "{{ username }}";
         const room = "{{ roomname }}";
+        let isInputMethodActive = false;
 
         const roomInfo = document.getElementById('room-info');
         roomInfo.textContent = `Room: ${room} | User: ${username}`;
@@ -225,10 +226,22 @@
                 console.log("Already connected");
             }
         })
+        document.addEventListener('compositionstart', function () {
+            isInputMethodActive = true;
+        });
+
+        document.addEventListener('compositionend', function () {
+            isInputMethodActive = false;
+        });
+        document.getElementById("message").addEventListener("keydown", function (event) {
+            event.stopPropagation();
+            if (!isInputMethodActive)
+                if (event.key == "Enter")
+                    sendMessage();
+
+        })
         document.getElementById("message").addEventListener("keyup", function (event) {
-            if (event.key == "Enter") {
-                sendMessage();
-            }
+            event.stopPropagation();
         })
         // let isVisibilityChangeCompleted = false;
         // window.addEventListener('visibilitychange', (event) => {
