@@ -10,7 +10,7 @@ from PSS.models.user import User
 app = create_app()
 
 # CORS(app,resources={r"/*": {"origins": "https://beamviewer.bizara.link"}})
-CORS(app,resources={r"/*": {"origins": ["http://13.112.29.121/","http://13.112.29.121:8000"]}})
+CORS(app,resources={r"/*": {"origins": ["http://13.112.29.121/","http://13.112.29.121:8000","http://localhost:3001",'http://localhost:3000','http://localhost:5000']}}, supports_credentials=True)
 # socketio.run(app)
 # migrate = Migrate(app, db)
 
@@ -22,4 +22,4 @@ cli=FlaskGroup(app)
 
 if __name__ == "__main__":
     cli()
-    # app.run(debug= True)
+    # app.run(debug= True,port=3001)

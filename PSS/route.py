@@ -1,4 +1,4 @@
-from flask import render_template,redirect,url_for,session,flash
+from flask import render_template,redirect,url_for,session,jsonify,request
 from PSS.extensions import Loginform,Registerform
 from flask_login import login_user,logout_user,login_required,current_user
 from PSS import db
@@ -55,3 +55,34 @@ def room():
     if not username or not roomname:
         return redirect(url_for('index'))
     return render_template('room.html', username=username, roomname=roomname)
+
+@login_required
+def gallery_import():
+    fetchSrc=request.cookies.get('src')
+    if request.method == 'POST':
+        roomname = request.form.get('roomname')
+        print(roomname)
+        session['roomname']=roomname
+        if not roomname:
+            return "Roomname is required!", 400
+        return redirect(url_for('room'))
+    return render_template('gallery_import.html',src=fetchSrc)
+
+@login_required
+def gallery_export():
+    username = session.get('username')
+    return render_template('gallery_export.html',username=username)
+
+def membership():
+    username = session.get('username')
+    if username :
+        return jsonify({
+            'status': 'success',
+            'user': username
+        }), 200
+    else:
+        return jsonify({
+            'status': 'error',
+            'message': 'Not authenticated'
+        }), 401
+    

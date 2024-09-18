@@ -119,3 +119,6 @@ dmypy.json
 
 # key
 *.pem
+
+# intro files
+*.pptx
