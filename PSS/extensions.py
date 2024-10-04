@@ -18,7 +18,6 @@ login_manager.login_view='index'
 class Loginform(FlaskForm):
     username=StringField("Username",validators=[DataRequired()])
     password=PasswordField("Password",validators=[DataRequired()])
-    roomname=StringField("Roomname",validators=[DataRequired()])
     remember_me=BooleanField("Remember me")
     submit =SubmitField('SignIn')
 

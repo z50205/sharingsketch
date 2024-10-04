@@ -24,7 +24,11 @@ can_mid.addEventListener("pointerout", function (e) {
 
 }, false);
 can_revise.addEventListener("wheel", function (e) {
-    m_zoom_in(e)
+    wheel_m_zoom_in(e)
+
+}, false);
+revise_range.addEventListener("pointerup", function (e) {
+    range_m_zoom_in()
 
 }, false);
 
@@ -69,7 +73,7 @@ function m_panCanvas(res, e) {
         }
     }
 }
-function m_zoom_in(e) {
+function wheel_m_zoom_in(e) {
     if (0.5 <= m_scale[0] <= 3) {
         m_scale[0] += e.deltaY * -0.0001;
         if (m_scale[0] > 3)
@@ -84,8 +88,25 @@ function m_zoom_in(e) {
         if (m_scale[1] < 0.3)
             m_scale[1] = 0.3;
     }
+    m_zoom_in(m_scale);
+    update_revise_range();
+}
+
+function range_m_zoom_in() {
+    m_scale[0]=parseFloat(revise_range.value);
+    m_scale[1]=parseFloat(revise_range.value);
+    m_zoom_in(m_scale);
+}
+
+function update_revise_range() {
+    revise_range.value =m_scale[0];
+  }
+
+function m_zoom_in(m_scale) {
     can_revise.style.transform = "scale(" + (m_scale[0] * scale_xy[0]).toString() + "," + (m_scale[1] * scale_xy[1]).toString() + ") " + "translate(" + (m_x_offset).toString() + "px," + (m_y_offset).toString() + "px)";
 }
+
+
 
 function findxy_mid(res, e, draw_flag) {
     if (choose_flag) {
@@ -183,6 +204,7 @@ function choose_area() {
     ctx_active.restore();
     revise_button.onclick = writedown;
     revise_button.innerHTML = "confirm";
+    document.getElementById('revise_range_div').style.display="block";
 }
 function writedown() {
     x_l = can_revise.offsetLeft + can_revise.width / 2 + m_x_offset * m_scale[0] * scale_xy[0] - m_scale[0] * scale_xy[0] * can_revise.width / 2 - canvas.offsetLeft;
@@ -204,6 +226,8 @@ function writedown() {
     restore[restore.length] = ctx_active.getImageData(0, 0, w, h);
     restore_active[restore_active.length] = ctx_active.id;
     document.getElementById('revise_hide').style.display='block';
+    revise_range.value=1;
+    document.getElementById('revise_range_div').style.display="none";
     updateCanvas();
 }
 function change_to_local(curr, scale_orgin, scale, scale_xy, offset) {

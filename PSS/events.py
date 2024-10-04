@@ -4,25 +4,19 @@ from PSS.extensions import socketio
 import threading
 from threading import Lock
 from PSS.extensions import Loginform
-
+# dict users->sid(keys)----[username,roomname]
 users={}
 typing_timers={}
 done_typing_interval =60*15
 typing_timers_lock = Lock()
-
-
-# @socketio.on("connect")
-# def handle_connect():
-#     start_typing_timer(request.sid)
-#     emit ("join",{"SelfSid":request.sid})
 
 @socketio.on("user_join")
 def joinUser(data):
     username=data['username']
     room = data['room']
     join_room(room)
-    # dict users->sid(keys)----[username,roomname]
     users[request.sid]=[username,room]
+    print("username:"+username)
     print(f"User {username} joined room {room}!")
     start_typing_timer(request.sid,room)
     room_memberlist=[]
@@ -72,7 +66,7 @@ def leave_room(room):
             room_memberlist.append(value[0])
     socketio.emit ("memberslistUpdate",{"memberslist":room_memberlist},to=room)
     socketio.emit ("leaveRemoveCanvas",{"LeaveSid":request.sid},to=room)
-    emit("redirect",{"url": url_for('index')} )
+    emit("redirect",{"url": url_for('room_choose')} )
 
 def start_typing_timer(sid,room):
     typing_timers[sid] = threading.Timer(done_typing_interval, delete_user, args=[sid,room])

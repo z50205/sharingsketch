@@ -122,3 +122,6 @@ dmypy.json
 
 # intro files
 *.pptx
+*.mp4
+Architecture.gif
+Sample.png

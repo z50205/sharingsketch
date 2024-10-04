@@ -8,8 +8,10 @@ COPY . /PSS
 
 WORKDIR /PSS
 
+RUN ls -l /PSS  # 檢查文件是否存在
+
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirement.txt && pip install gevent-websocket && pip install gunicorn && chmod 755 run_server.sh
 
 EXPOSE 8002
 
-ENTRYPOINT ["./run_server.sh"]
+ENTRYPOINT ["/PSS/run_server.sh"]
