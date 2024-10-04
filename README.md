@@ -67,8 +67,6 @@ https://github.com/user-attachments/assets/12d132a8-f305-4cc0-ad9e-0e010712fd26
 
 
 
----
-
 ## Tech Stack
 
 - **Sharing Sketch:**
@@ -94,27 +92,9 @@ https://github.com/user-attachments/assets/12d132a8-f305-4cc0-ad9e-0e010712fd26
   <img src="https://github.com/user-attachments/assets/bddccf38-3857-4b35-a5f6-6fc2df72d787" width="80%"></img>
 </div>
 
-
+---
 ### Synchronization Canvas
 - **Canvas Stack:** Use a series of SocketIO canvas element to synchronize each users and implement drawing tools.
 <div align="center">
   <img src="https://github.com/user-attachments/assets/80ac7927-930a-4c23-921d-9ec65bb2d06c" width="80%"></img>
 </div>
-
-
-## Utilize Details
-
-### Deploy on AWS EC2 for example:
-
-- **1. git clone to VM/PC:**`git clone https://github.com/z50205/PSS_websocket.git`
-
-- **2. change and add parameter**
-
-  1. room.html(javascript):`const socket = io('http://[your ip/domain name]', { transports: ["websocket"], autoConnect: false });`
-  2. \_\_init.py(python):`socketio.init_app(app, cors_allowed_origins=['http://[your ip/domain name]','http://[your ip/domain name]:8002'])`
-  3. .env: add `SECRET_KEY='xxxxxxxx'`
-
-- **3. Docker build container:** `docker build -t [imagesname] .`
-
-- **4. Docker compose:** `docker compose up -d`
-
