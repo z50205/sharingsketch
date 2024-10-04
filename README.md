@@ -1,6 +1,6 @@
 # SharingSketch _- a synchronization drawing tool._
 **Sharing Sketch is a real-time synchronization drawing tool, designed to collaborate with users on one canvas.**
-![alt text](PSS/static/Sample.png)
+![Sample](https://github.com/user-attachments/assets/2e825db7-49c3-4220-80e7-7c614aba8efd)
 - **Demo Site**: https://bizara.link/
 
 ## Features
@@ -8,29 +8,47 @@
 ### Join Room
 
 - **Join Room:** Enter a new room name and join the room, or use the room list to enter an existing room.
-  <video controls src="./Record/Join.mp4" title="Join Room"></video>
+- 
+
+https://github.com/user-attachments/assets/29593eee-928a-4bf1-ab65-7b7c577047a6
+
+
 
 ---
 
 ### Sketch
 
 - **Paint Tools:** Draw with a pen or an eraser that allows you to adjust color and line width.
-  <video controls src="./Record/Paint.mp4" title="Paint Tools"></video>
+
+
+https://github.com/user-attachments/assets/a8133998-eab7-4eb2-9fc2-b289911082b5
+
+
 
 ---
 
 - **Canvas Tools:** Provide undo, mirror, and selection adjustment functionalities to enhance drawing efficiency.
-  <video controls src="./Record/Canvas.mp4" title="Canvas Tools"></video>
+
+
+https://github.com/user-attachments/assets/44beef46-0ca5-4879-aacc-e69263c60926
+
+
 
 ---
 
 - **File Tools:** Download image or export to SketchGallery for storage, as well as import image from your device to continue drawing.
-  <video controls src="./Record/File.mp4" title="File Tools"></video>
+
+
+https://github.com/user-attachments/assets/6f8e84d8-9e1a-4cfc-aa44-9db05512daea
 
 ---
 
 - **Layer Tools:** Create individual layers and easily change their order.
-  <video controls src="./Record/Layer.mp4" title="Layer Tools"></video>
+
+
+https://github.com/user-attachments/assets/218bfdef-ab52-49a5-9905-91536cf219c7
+
+
 
 ---
 
@@ -39,7 +57,9 @@
 - **Delete:** Delete images if the user is the creator, ensuring proper permissions.
 - **Export:** Export image to SharingSketch for further editing.
 - **Download:** Download images to your device.
-  <video controls src="./Record/Gallery.mp4" title="Gallery"></video>
+https://github.com/user-attachments/assets/12d132a8-f305-4cc0-ad9e-0e010712fd26
+
+
 
 ---
 
@@ -68,7 +88,8 @@
 
 ### Architecture Design
 - **Nginx Proxy:**  Reverse proxy to hide the specific addresses of backend containers, enhancing security and increasing flexibility.
--  ![alt text](PSS/static/Architecture.gif)
+-  ![Architecture](https://github.com/user-attachments/assets/bddccf38-3857-4b35-a5f6-6fc2df72d787)
+
 
 ## Utilize Details
 
