@@ -1,14 +1,18 @@
 # SharingSketch _- a synchronization drawing tool._
 **Sharing Sketch is a real-time synchronization drawing tool, designed to collaborate with users on one canvas.**
-![Sample](https://github.com/user-attachments/assets/2e825db7-49c3-4220-80e7-7c614aba8efd)
 - **Demo Site**: https://bizara.link/
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/2e825db7-49c3-4220-80e7-7c614aba8efd" width="80%"></img>
+</div>
+
 
 ## Features
 
 ### Join Room
 
 - **Join Room:** Enter a new room name and join the room, or use the room list to enter an existing room.
-- 
+
 
 https://github.com/user-attachments/assets/29593eee-928a-4bf1-ab65-7b7c577047a6
 
@@ -57,6 +61,8 @@ https://github.com/user-attachments/assets/218bfdef-ab52-49a5-9905-91536cf219c7
 - **Delete:** Delete images if the user is the creator, ensuring proper permissions.
 - **Export:** Export image to SharingSketch for further editing.
 - **Download:** Download images to your device.
+
+
 https://github.com/user-attachments/assets/12d132a8-f305-4cc0-ad9e-0e010712fd26
 
 
@@ -70,7 +76,7 @@ https://github.com/user-attachments/assets/12d132a8-f305-4cc0-ad9e-0e010712fd26
   - **Server:** Flask(Flask-SocketIO)
   - **Client:** HTML,CSS,JavaScript(SocketIO)
   - **Database:** SQLite
-- **Sketch Gallery(Rep link):**
+- **Sketch Gallery(Repo [link](https://github.com/z50205/SketchGallery_front.git)):**
   - **Programming Language:** JavaScript
   - **Server:** Node.js,Express.js
   - **Client:** React.js
@@ -82,13 +88,18 @@ https://github.com/user-attachments/assets/12d132a8-f305-4cc0-ad9e-0e010712fd26
 
 ## Design Concept
 
-### Synchronization Canvas
-- **Canvas Stack:** Use a series of SocketIO canvas element to synchronize each users and implement drawing tools.
--  ![SharingSketch_intro3](https://github.com/user-attachments/assets/80ac7927-930a-4c23-921d-9ec65bb2d06c)
-
 ### Architecture Design
 - **Nginx Proxy:**  Reverse proxy to hide the specific addresses of backend containers, enhancing security and increasing flexibility.
--  ![Architecture](https://github.com/user-attachments/assets/bddccf38-3857-4b35-a5f6-6fc2df72d787)
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/bddccf38-3857-4b35-a5f6-6fc2df72d787" width="80%"></img>
+</div>
+
+
+### Synchronization Canvas
+- **Canvas Stack:** Use a series of SocketIO canvas element to synchronize each users and implement drawing tools.
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/80ac7927-930a-4c23-921d-9ec65bb2d06c" width="80%"></img>
+</div>
 
 
 ## Utilize Details
