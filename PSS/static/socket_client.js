@@ -11,7 +11,7 @@ const socket = io("https://bizara.link", {
   autoConnect: false,
 });
 // const socket = io({ transports: ["websocket"] });
-// const socket = io("http://localhost:8002", { transports: ["websocket"] });
+// const socket = io("http://localhost", { transports: ["websocket"] });
 document.getElementById("join-btn").addEventListener("click", function () {
   if (!socket.connected) {
     socket.connect();

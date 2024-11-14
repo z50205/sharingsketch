@@ -7,7 +7,8 @@ __pycache__/
 *.so
 
 # Distribution / packaging
-PSS-env
+sketch_dist
+sketch-env
 twittor/static
 .Python
 build/

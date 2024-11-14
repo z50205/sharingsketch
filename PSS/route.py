@@ -3,7 +3,11 @@ from PSS.extensions import Loginform,Registerform
 from flask_login import login_user,logout_user,login_required,current_user
 from PSS import db
 from PSS.models.user import User
-from PSS.events import users
+import redis
+import json
+
+redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
+
 
 def index():
     form=Loginform()
@@ -49,12 +53,13 @@ def register():
 
 @login_required
 def room():
-
     username = session.get('username')
     roomname = session.get('roomname')
     if not username or not roomname or not current_user.is_authenticated:
         return redirect(url_for('index'))
     return render_template('room.html', username=username, roomname=roomname)
+# load test
+    # return render_template('room.html', username='test', roomname='testroom')
 
 @login_required
 def room_choose():
@@ -65,8 +70,6 @@ def room_choose():
     username = session.get('username')
     if request.method == 'POST':
         roomname = request.form.get('roomname')
-        print('users',users)
-        print('roominfo',roominfo)
         session['roomname']=roomname
         if not roomname:
             return "Roomname is required!", 400
@@ -107,10 +110,17 @@ def membership():
 
 def get_roomInfo():
     room_dict={}
+    users_data = redis_client.get('users')
+    if users_data is None:
+        users = {} 
+    else:
+        users = json.loads(users_data)
     for key,values in users.items():
         if values[1] not in room_dict:
             room_dict[values[1]] = []  # 初始化為空列表
         room_dict[values[1]].append(values[0])
+    print('users',users)
+    print('roominfo',room_dict)
     return room_dict
 
 

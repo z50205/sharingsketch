@@ -3,11 +3,14 @@ from PSS.extensions import db,migrate,login_manager,mail
 from PSS.config import Config
 from PSS.route import index,room,register,room_choose,gallery_export,membership,logout
 from PSS.events import socketio
+from gevent import monkey
+
+monkey.patch_all()
 
 def create_app():
     app=Flask(__name__)
     app.config.from_object(Config)
-    socketio.init_app(app, cors_allowed_origins=['http://13.112.29.121','http://127.0.0.1:5000','http://13.112.29.121:8002','http://localhost','http://localhost:8002','https://bizara.link'],  max_http_buffer_size=2e7)
+    socketio.init_app(app, cors_allowed_origins=['http://127.0.0.1:5000','http://localhost','http://localhost:8002','https://bizara.link'], message_queue='redis://redis:6379',max_http_buffer_size=20*1024*1024,logger=True,always_connect =True)
     db.init_app(app)
     migrate.init_app(app,db)
     login_manager.init_app(app)

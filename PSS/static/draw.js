@@ -35,7 +35,7 @@ line_widths = [2, 10, 0]; //Set tools linewidth 1.pen；2.eraser 3.other(no _use
 line_widths_max = [100, 200, 0]; //Set tools linewidth Maximum 1.pen；2.eraser 3.other(no _use)
 pan_flag = false;
 mirror_flag = false;
-restore_max = 20;
+restore_max = 30;
 var x = "black";
 
 //Init
@@ -436,6 +436,10 @@ async function gogallery() {
   leave_room();
   window.location.href = "/gallery";
 }
+async function reroomlist() {
+  leave_room();
+  window.location.href = "/rooms";
+}
 //Tool Load image from gallery
 async function loadimage_gallery() {
   const cookieValue = cookie_value("src");
@@ -679,7 +683,6 @@ function erase_all() {
   var m = confirm("Want to clear");
   if (m) {
     ctx_active.clearRect(0, 0, w, h);
-    document.getElementById("canvasimg").style.display = "none";
     updateCanvas();
   }
 }
@@ -699,5 +702,6 @@ function updateCanvas() {
   // console.log(thumbnail_img);
   thumbnail_img.src = can_active.toDataURL("image/png");
   const can_proj_data = can_proj.toDataURL("image/png");
-  socket.emit("new_img", { can_proj_data, room });
+  start_at =  Date.now()
+  socket.emit("new_img", { can_proj_data, room ,start_at});
 }
